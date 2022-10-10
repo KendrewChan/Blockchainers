@@ -5,7 +5,7 @@ https://www.youtube.com/watch?v=gyMwXuJrbJQ&t=64669s between 13:41:00 to 18:50:0
 
 ## Initialising project (for both contracts & FE directories)
 - Run `yarn add` for node_modules
-- Add the respective `.env` variables (can use my api keys below, just add your own private key)
+- Add the respective `.env` variables under the contract folder (can use my api keys below, just add your own private key)
 ```
 GOERLI_RPC_URL=https://eth-goerli.g.alchemy.com/v2/4minTa6t2tVNTyrGsvDxYobj9Yxwc6m0
 PRIVATE_KEY= // Metamask private-key
