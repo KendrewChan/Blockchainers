@@ -1,6 +1,6 @@
 # Blockchainers
 
-## Initialising project
+## Initialising project (for both contracts & FE directories)
 - Run `yarn add` for node_modules
 - Add the respective `.env` variables
 
