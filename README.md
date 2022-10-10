@@ -17,3 +17,14 @@ UPDATE_FRONT_END=true
 ## Running the project:
 - Under the contracts folder: run `hh node`
 - Under the FE folder: run `yarn dev`
+
+## Testing
+### Unit Tests
+Run `hh test`
+
+### Staging Tests
+Run hh test --network goerli
+3 things to take note before running the above command:
+  1. Contract should be deployed to goerli testnet
+  2. Contract address should be added to Chainlink VRF (value randomiser) & subscriptionId in helper-hard-config needs to be changed
+  3. Contract address should be added to Chainlink Upkeep (cronjob)
