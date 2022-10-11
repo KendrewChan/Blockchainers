@@ -16,8 +16,7 @@ UPDATE_FRONT_END=true
 
 ## Running the project:
 Add hardhat network to metamask:
-1. Get the RPC_URL of your hh node (usually http://127.0.0.1:8545/)
-2. Go to your wallet and add a new network. See instructions here.
+- Go to your wallet and add a new network. See instructions here.
   - Network Name: Hardhat-Localhost
   - New RPC URL: http://127.0.0.1:8545/
   - Chain ID: 31337
@@ -25,7 +24,7 @@ Add hardhat network to metamask:
   - Block Explorer URL: None
   
 - Under the contracts folder: run `hh node`
-  - Copy the private keys from the console and import account in metamask to use
+  - Copy the private keys from console and import account in metamask to use
 - Under the FE folder: run `yarn dev`
 
 ## Testing
@@ -34,7 +33,7 @@ Run `hh test`
 
 ### Staging Tests
 Run `hh test --network goerli`
-3 things to take note before running the above command:
+- 3 things to take note before running the above command:
   1. Contract should be deployed to goerli testnet
   2. Contract address should be added to Chainlink VRF (value randomiser) & subscriptionId in helper-hard-config needs to be changed
   3. Contract address should be added to Chainlink Upkeep (cronjob)
