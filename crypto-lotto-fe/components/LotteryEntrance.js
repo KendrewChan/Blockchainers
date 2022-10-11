@@ -10,7 +10,7 @@ import abi from "../constants/abi.json"
 export default function LotteryEntrance() {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex)
-    const lottoAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
+    const raffleAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
 
     const dispatch = useNotification()
 
@@ -25,7 +25,7 @@ export default function LotteryEntrance() {
         isFetching,
     } = useWeb3Contract({
         abi: abi,
-        contractAddress: lottoAddress,
+        contractAddress: raffleAddress,
         functionName: "buyTickets",
         msgValue: ticketCost,
         params: {},
@@ -33,13 +33,14 @@ export default function LotteryEntrance() {
 
     const { runContractFunction: getTicketCost } = useWeb3Contract({
         abi: abi,
-        contractAddress: lottoAddress,
+        contractAddress: raffleAddress,
         functionName: "getTicketCost",
         params: {},
     })
 
     async function updateUI() {
-        setTicketCost((await getTicketCost()).toString())
+        const ticketCost = await getTicketCost()
+        setTicketCost(ticketCost.toString())
 
         // const numPlayersFromCall = (await getPlayersNumber()).toString()
         // setNumberOfPlayers(numPlayersFromCall)
@@ -81,7 +82,7 @@ export default function LotteryEntrance() {
     return (
         <div>
             {" "}
-            {lottoAddress ? (
+            {raffleAddress ? (
                 <div>
                     <button onClick={buyTicketBtn}>Enter lottery</button>
                     Ticket cost is {ticketCost / 1e18} ETH

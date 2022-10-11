@@ -13,6 +13,7 @@ error RaffleUpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint256 
 error ErrorPayingWinner();
 error RaffleInsuficientFunds(uint256 msgValue, uint256 requiredValue);
 error RaffleNotOpen();
+error RaffleHasNoBidders();
 
 /**@title A sample Raffle Contract
  * @author Patrick Collins
@@ -43,9 +44,9 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     uint256 private i_tixCostWei = 5e15; // Equivalent to 0.005ETH. Use https://www.eth-to-wei.com/
     // uint256 private i_tixCostWei = 1e18;
 
-    address[] private contestants;
     mapping(address => bool) admins;
 
+    address[] private contestants;
     mapping(address => uint256) public tickets;
     uint256 private totalNumTickets = 0;
 
@@ -86,6 +87,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         uint256, /* requestId */
         uint256[] memory randomWords
     ) internal override {
+        if (contestants.length == 0) revert RaffleHasNoBidders();
         address[] memory rafflePool = new address[](totalNumTickets);
         uint256 raffleIdx = 0;
         for (uint256 i = 0; i < contestants.length; i++) {
@@ -101,6 +103,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         address winnerAddr = rafflePool[winningIdx];
         s_recentWinner = winnerAddr;
 
+        totalNumTickets = 0;
         contestants = new address[](0);
         s_raffleState = RaffleState.OPEN;
         s_lastTimeStamp = block.timestamp;
@@ -169,10 +172,10 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         if (msg.value < i_tixCostWei) revert RaffleInsuficientFunds(msg.value, i_tixCostWei);
 		if (s_raffleState != RaffleState.OPEN) revert RaffleNotOpen();
 
+        if (tickets[msg.sender] == 0) contestants.push(msg.sender);
         uint256 numTix = msg.value / i_tixCostWei;
         tickets[msg.sender] += numTix;
         totalNumTickets += numTix;
-        contestants.push(msg.sender);
 
         emit RaffleEnter(msg.sender);
     }
@@ -232,5 +235,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         return contestants.length;
     }
 
-
+    function getNumTickets() public view returns (uint256) {
+        return totalNumTickets;
+    }
 }
