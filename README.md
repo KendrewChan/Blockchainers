@@ -15,7 +15,17 @@ UPDATE_FRONT_END=true
 ```
 
 ## Running the project:
+Add hardhat network to metamask:
+1. Get the RPC_URL of your hh node (usually http://127.0.0.1:8545/)
+2. Go to your wallet and add a new network. See instructions here.
+  - Network Name: Hardhat-Localhost
+  - New RPC URL: http://127.0.0.1:8545/
+  - Chain ID: 31337
+  - Currency Symbol: ETH (or GO)
+  - Block Explorer URL: None
+  
 - Under the contracts folder: run `hh node`
+  - Copy the private keys from the console and import account in metamask to use
 - Under the FE folder: run `yarn dev`
 
 ## Testing
