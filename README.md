@@ -23,7 +23,7 @@ UPDATE_FRONT_END=true
 Run `hh test`
 
 ### Staging Tests
-Run hh test --network goerli
+Run `hh test --network goerli`
 3 things to take note before running the above command:
   1. Contract should be deployed to goerli testnet
   2. Contract address should be added to Chainlink VRF (value randomiser) & subscriptionId in helper-hard-config needs to be changed
