@@ -1,5 +1,4 @@
-import { useWeb3Contract } from "react-moralis"
-import { useMoralis } from "react-moralis"
+import { useWeb3Contract, useMoralis, useWeb3ExecuteFunction } from "react-moralis"
 import { useEffect, useState } from "react"
 import { ethers } from "ethers"
 import { useNotification } from "web3uikit"
@@ -8,15 +7,18 @@ import contractAddresses from "../constants/contractAddresses.json"
 import abi from "../constants/abi.json"
 
 export default function LotteryEntrance() {
-    const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
+    // TODO: Check if other networks are being used, and reject/show diff page
+    // TODO: Reactively update account's ETH (currently it's not updated after buyTickets())
+    const { chainId: chainIdHex, isWeb3Enabled, account } = useMoralis()
     const chainId = parseInt(chainIdHex)
     const raffleAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
 
     const dispatch = useNotification()
 
     const [ticketCost, setTicketCost] = useState("0")
-    // const [numberOfPlayers, setNumberOfPlayers] = useState("0")
-    // const [recentWinner, setRecentWinner] = useState("0")
+    const [numberOfTickets, setNumberOfTickets] = useState("0")
+    // const [numberOfTicketsUser, setNumberOfTicketsUser] = useState("0")
+    const [recentWinner, setRecentWinner] = useState("0")
 
     const {
         runContractFunction: buyTickets,
@@ -38,15 +40,41 @@ export default function LotteryEntrance() {
         params: {},
     })
 
+    const { runContractFunction: getNumTickets } = useWeb3Contract({
+        abi: abi,
+        contractAddress: raffleAddress,
+        functionName: "getNumTickets",
+        params: {},
+    })
+
+    // TODO: Fix this
+    // const { runContractFunction: tickets } = useWeb3Contract({
+    //     abi: abi,
+    //     contractAddress: raffleAddress,
+    //     functionName: "tickets",
+    //     params: {},
+    // })
+
+    // TODO: Check for when recentWinner is empty, aka 0x0000000000000000000000000000000000000000
+    const { runContractFunction: getRecentWinner } = useWeb3Contract({
+        abi: abi,
+        contractAddress: raffleAddress,
+        functionName: "getRecentWinner",
+        params: {},
+    })
+
     async function updateUI() {
         const ticketCost = await getTicketCost()
         setTicketCost(ticketCost.toString())
 
-        // const numPlayersFromCall = (await getPlayersNumber()).toString()
-        // setNumberOfPlayers(numPlayersFromCall)
+        const numTicketsFromCall = (await getNumTickets()).toString()
+        setNumberOfTickets(numTicketsFromCall)
 
-        // const recentWinnerFromCall = await getRecentWinner()
-        // setRecentWinner(recentWinnerFromCall)
+        const numTicketsUserFromCall = (await fetch()).toString()
+        setNumberOfTicketsUser(numTicketsUserFromCall)
+
+        const recentWinnerFromCall = await getRecentWinner()
+        setRecentWinner(recentWinnerFromCall)
     }
 
     useEffect(() => {
@@ -69,6 +97,7 @@ export default function LotteryEntrance() {
     let handleSuccess = async (transaction) => {
         await transaction.wait(1)
         handleNewNotifcation(transaction)
+        updateUI()
     }
 
     let buyTicketBtn = async () => {
@@ -79,13 +108,29 @@ export default function LotteryEntrance() {
         })
     }
 
+    // TODO: Change these ternary operators into functions
+    // TODO: Show number of tickets the user currently holds
     return (
-        <div>
-            {" "}
+        <div className="p-5">
             {raffleAddress ? (
                 <div>
-                    <button onClick={buyTicketBtn}>Enter lottery</button>
-                    Ticket cost is {ticketCost / 1e18} ETH
+                    <p>
+                        <button
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
+                            onClick={buyTicketBtn}
+                            disabled={isLoading || isFetching}
+                        >
+                            {isLoading || isFetching ? (
+                                <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+                            ) : (
+                                "Enter Lottery"
+                            )}
+                        </button>
+                    </p>
+                    <p>Ticket cost: {ticketCost / 1e18} ETH</p>
+                    <p>Number of tickets in pool: {numberOfTickets}</p>
+                    <p>RecentWinner: {recentWinner}</p>
+                    {/* <p>Number of tickets you bought (in-progress): {numberOfTicketsUser}</p> */}
                 </div>
             ) : (
                 <div>No Raffle Address detected</div>
