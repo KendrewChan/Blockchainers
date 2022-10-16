@@ -14,7 +14,7 @@ COINMARKETCAP_API_KEY=846d7069-54d9-4931-86fa-7dbd3938cd40
 UPDATE_FRONT_END=true
 ```
 
-## Running the project:
+## Running the project (localhost):
 Add hardhat network to metamask:
 - Go to your wallet and add a new network. See instructions here.
   - Network Name: Hardhat-Localhost
@@ -26,6 +26,7 @@ Add hardhat network to metamask:
 - Under the contracts folder: run `hh node`
   - Copy the private keys from console and import account in metamask to use
 - Under the FE folder: run `yarn dev`
+  - For `goerli` testnet, `hh node` is not needed
 
 ## Testing
 ### Unit Tests
