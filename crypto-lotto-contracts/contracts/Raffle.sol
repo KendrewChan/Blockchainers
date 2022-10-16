@@ -238,4 +238,12 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     function getNumTickets() public view returns (uint256) {
         return totalNumTickets;
     }
+
+    function getUserTickets() public view returns (uint256) {
+        return tickets[msg.sender];
+    }
+
+    function isUserAdmin() public view returns (bool) {
+        return admins[msg.sender];
+    }
 }

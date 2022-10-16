@@ -14,6 +14,7 @@ module.exports = async function () {
     }
 }
 
+// NOTE: Change the "gas" limits in abi.json in FE if it's too high
 updateAbi = async () => {
     const raffle = await ethers.getContract("Raffle")
     fs.writeFileSync(FRONT_END_ABI_FILE, raffle.interface.format(ethers.utils.FormatTypes.json))

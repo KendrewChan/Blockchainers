@@ -17,9 +17,12 @@ export default function LotteryEntrance() {
 
     const [ticketCost, setTicketCost] = useState("0")
     const [numberOfTickets, setNumberOfTickets] = useState("0")
-    // const [numberOfTicketsUser, setNumberOfTicketsUser] = useState("0")
+    const [numberOfOwnedTickets, setOwnedTickets] = useState("0")
     const [recentWinner, setRecentWinner] = useState("0")
+    const [isAdmin, setIsAdmin] = useState(false)
+    const [isAdminPage, setIsAdminPage] = useState(false)
 
+    // TODO: Make user be able to input the number of tickets he want to buy
     const {
         runContractFunction: buyTickets,
         data: enterTxResponse,
@@ -47,20 +50,33 @@ export default function LotteryEntrance() {
         params: {},
     })
 
-    // TODO: Fix this
-    // const { runContractFunction: tickets } = useWeb3Contract({
-    //     abi: abi,
-    //     contractAddress: raffleAddress,
-    //     functionName: "tickets",
-    //     params: {},
-    // })
+    const { runContractFunction: getUserTickets } = useWeb3Contract({
+        abi: abi,
+        contractAddress: raffleAddress,
+        functionName: "getUserTickets",
+        params: {},
+    })
 
-    // TODO: Check for when recentWinner is empty, aka 0x0000000000000000000000000000000000000000
     const { runContractFunction: getRecentWinner } = useWeb3Contract({
         abi: abi,
         contractAddress: raffleAddress,
         functionName: "getRecentWinner",
         params: {},
+    })
+
+    const { runContractFunction: isUserAdmin } = useWeb3Contract({
+        abi: abi,
+        contractAddress: raffleAddress,
+        functionName: "isUserAdmin",
+        params: {},
+    })
+
+    // TODO: This function doesn't run for some reason
+    const { runContractFunction: performUpkeep } = useWeb3Contract({
+        abi: abi,
+        contractAddress: raffleAddress,
+        functionName: "performUpkeep",
+        params: { calldata: 0x0 },
     })
 
     async function updateUI() {
@@ -70,11 +86,14 @@ export default function LotteryEntrance() {
         const numTicketsFromCall = (await getNumTickets()).toString()
         setNumberOfTickets(numTicketsFromCall)
 
-        const numTicketsUserFromCall = (await fetch()).toString()
-        setNumberOfTicketsUser(numTicketsUserFromCall)
+        const ownedTickets = (await getUserTickets()).toString()
+        setOwnedTickets(ownedTickets)
 
         const recentWinnerFromCall = await getRecentWinner()
         setRecentWinner(recentWinnerFromCall)
+
+        const userStatus = await isUserAdmin()
+        setIsAdmin(userStatus)
     }
 
     useEffect(() => {
@@ -83,7 +102,7 @@ export default function LotteryEntrance() {
         }
     }, [isWeb3Enabled]) // Run this function whenever `isWeb3Enabled` changes
 
-    let handleNewNotifcation = async () => {
+    let handleNewNotification = async () => {
         // Can read up on these on "web3ui.github"
         dispatch({
             type: "info",
@@ -94,13 +113,23 @@ export default function LotteryEntrance() {
         })
     }
 
-    let handleSuccess = async (transaction) => {
-        await transaction.wait(1)
-        handleNewNotifcation(transaction)
+    let handleSuccess = async (tx) => {
+        await tx.wait(1)
+        handleNewNotification(transaction)
         updateUI()
     }
 
-    let buyTicketBtn = async () => {
+    const handleSelectWinnerSuccess = async (tx) => {
+        await tx.wait(1)
+        dispatch({
+            type: "success",
+            message: "Winner Selected!",
+            title: "Winner Selected",
+            position: "topR",
+        })
+    }
+
+    const buyTicketBtn = async () => {
         await buyTickets({
             // onComplete:
             onSuccess: handleSuccess, // When function is successful
@@ -108,33 +137,92 @@ export default function LotteryEntrance() {
         })
     }
 
-    // TODO: Change these ternary operators into functions
-    // TODO: Show number of tickets the user currently holds
-    return (
-        <div className="p-5">
-            {raffleAddress ? (
-                <div>
+    // TODO: Not sure why this ain't working. It works with contract tho
+    const selectWinnerBtn = async () => {
+        await performUpkeep({
+            onSuccess: handleSelectWinnerSuccess,
+            onError: (err) => console.log(err),
+        })
+    }
+
+    const changeAdminPage = () => {
+        setIsAdminPage(!isAdminPage)
+    }
+
+    const showUserInterface = () => {
+        return (
+            <div>
+                <p>
+                    RecentWinner:
+                    {recentWinner == "0x0000000000000000000000000000000000000000"
+                        ? "No recent winner"
+                        : recentWinner}
+                </p>
+                <br />
+                <p>
+                    <button
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
+                        onClick={buyTicketBtn}
+                        disabled={isLoading || isFetching}
+                    >
+                        {isLoading || isFetching ? (
+                            <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+                        ) : (
+                            "Enter Lottery"
+                        )}
+                    </button>
+                </p>
+                <p>Ticket cost: {ticketCost / 1e18} ETH</p>
+                <p>Total Ticket pool: {numberOfTickets}</p>
+                <p>Owned tickets: {numberOfOwnedTickets}</p>
+                <br />
+                {isAdmin ? (
                     <p>
                         <button
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
-                            onClick={buyTicketBtn}
-                            disabled={isLoading || isFetching}
+                            onClick={changeAdminPage}
                         >
-                            {isLoading || isFetching ? (
-                                <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
-                            ) : (
-                                "Enter Lottery"
-                            )}
+                            Go to admin page
                         </button>
                     </p>
-                    <p>Ticket cost: {ticketCost / 1e18} ETH</p>
-                    <p>Number of tickets in pool: {numberOfTickets}</p>
-                    <p>RecentWinner: {recentWinner}</p>
-                    {/* <p>Number of tickets you bought (in-progress): {numberOfTicketsUser}</p> */}
-                </div>
-            ) : (
-                <div>No Raffle Address detected</div>
-            )}
-        </div>
-    )
+                ) : (
+                    ""
+                )}
+            </div>
+        )
+    }
+
+    // TODO: Add admin function to change ticket cost and add other admins
+    const showAdminInterface = () => {
+        return (
+            <div>
+                <p>You are admin</p>
+                <p>
+                    <button
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
+                        onClick={changeAdminPage}
+                    >
+                        Back to lottery page
+                    </button>
+                </p>
+                <br />
+                <p>
+                    <button
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
+                        onClick={selectWinnerBtn}
+                    >
+                        Select Winner
+                    </button>
+                </p>
+            </div>
+        )
+    }
+
+    const showInterfaces = () => {
+        if (!raffleAddress) return <div>No Raffle Address detected</div>
+        if (isAdminPage) return showAdminInterface()
+        return showUserInterface()
+    }
+
+    return <div className="p-5">{showInterfaces()}</div>
 }
