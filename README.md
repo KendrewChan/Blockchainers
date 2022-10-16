@@ -28,6 +28,7 @@ Add hardhat network to metamask:
 - Under the FE folder: run `yarn dev`
   - For `goerli` testnet, `hh node` is not needed
   - Current deployed contract: https://goerli.etherscan.io/address/0x72b5F7ce2E526C98f48d74B02E6FA4A9f4e2F3D6#writeContract
+  - Get goerli faucet from https://faucets.chain.link/
 
 ## Testing
 ### Unit Tests
