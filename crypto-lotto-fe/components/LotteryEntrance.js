@@ -97,9 +97,7 @@ export default function LotteryEntrance() {
     }
 
     useEffect(() => {
-        if (isWeb3Enabled) {
-            updateUI()
-        }
+        if (isWeb3Enabled) updateUI()
     }, [isWeb3Enabled]) // Run this function whenever `isWeb3Enabled` changes
 
     let handleNewNotification = async () => {
@@ -115,7 +113,7 @@ export default function LotteryEntrance() {
 
     let handleSuccess = async (tx) => {
         await tx.wait(1)
-        handleNewNotification(transaction)
+        handleNewNotification()
         updateUI()
     }
 
