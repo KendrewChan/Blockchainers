@@ -8,8 +8,7 @@ import abi from "../constants/abi.json"
 
 export default function LotteryEntrance() {
     // TODO: Check if other networks are being used, and reject/show diff page
-    // TODO: Reactively update account's ETH (currently it's not updated after buyTickets())
-    const { chainId: chainIdHex, isWeb3Enabled, account } = useMoralis()
+    const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex)
     const raffleAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
 
@@ -21,6 +20,10 @@ export default function LotteryEntrance() {
     const [recentWinner, setRecentWinner] = useState("0")
     const [isAdmin, setIsAdmin] = useState(false)
     const [isAdminPage, setIsAdminPage] = useState(false)
+
+    useEffect(() => {
+        if (isWeb3Enabled) updateUI()
+    }, [isWeb3Enabled])
 
     // TODO: Make user be able to input the number of tickets he want to buy
     const {
@@ -76,7 +79,7 @@ export default function LotteryEntrance() {
         abi: abi,
         contractAddress: raffleAddress,
         functionName: "performUpkeep",
-        params: { calldata: 0x0 },
+        params: { performData: 0x0 }, // I suspect sth wrong with this, but not sure
     })
 
     async function updateUI() {
@@ -96,11 +99,7 @@ export default function LotteryEntrance() {
         setIsAdmin(userStatus)
     }
 
-    useEffect(() => {
-        if (isWeb3Enabled) updateUI()
-    }, [isWeb3Enabled]) // Run this function whenever `isWeb3Enabled` changes
-
-    let handleNewNotification = async () => {
+    const handleNewNotification = async () => {
         // Can read up on these on "web3ui.github"
         dispatch({
             type: "info",
@@ -111,7 +110,7 @@ export default function LotteryEntrance() {
         })
     }
 
-    let handleSuccess = async (tx) => {
+    const handleSuccess = async (tx) => {
         await tx.wait(1)
         handleNewNotification()
         updateUI()
@@ -151,7 +150,7 @@ export default function LotteryEntrance() {
         return (
             <div>
                 <p>
-                    RecentWinner:
+                    {"RecentWinner: "}
                     {recentWinner == "0x0000000000000000000000000000000000000000"
                         ? "No recent winner"
                         : recentWinner}
