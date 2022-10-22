@@ -2,6 +2,7 @@ import { useWeb3Contract, useMoralis, useWeb3ExecuteFunction } from "react-moral
 import { useEffect, useState } from "react"
 import { ethers } from "ethers"
 import { useNotification } from "web3uikit"
+import Winner from "./Winner"
 
 import contractAddresses from "../constants/contractAddresses.json"
 import abi from "../constants/abi.json"
@@ -84,7 +85,6 @@ export default function LotteryEntrance() {
 
     async function updateUI() {
         const ticketCost = await getTicketCost()
-        setTicketCost(ticketCost.toString())
 
         const numTicketsFromCall = (await getNumTickets()).toString()
         setNumberOfTickets(numTicketsFromCall)
@@ -148,15 +148,21 @@ export default function LotteryEntrance() {
 
     const showUserInterface = () => {
         return (
-            <div>
-                <p>
-                    {"RecentWinner: "}
-                    {recentWinner == "0x0000000000000000000000000000000000000000"
-                        ? "No recent winner"
-                        : recentWinner}
-                </p>
-                <br />
-                <p>
+            <div className="flex flex-col justify-center items-center m-8">
+                <div className="flex flex-col justify-center items-center">
+                    <div className="pt-15">
+                        <h1 className="text-3xl">Recent Winner:</h1>
+                    </div>
+                    <Winner address={recentWinner}></Winner>
+                </div>
+
+                <div className="flex flex-col items-center p-4">
+                    <p>Ticket cost: {ticketCost / 1e18} ETH</p>
+                    <p>Total Ticket pool: {numberOfTickets}</p>
+                    <p>Owned tickets: {numberOfOwnedTickets}</p>
+                </div>
+
+                <div className="p-4">
                     <button
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
                         onClick={buyTicketBtn}
@@ -168,10 +174,8 @@ export default function LotteryEntrance() {
                             "Enter Lottery"
                         )}
                     </button>
-                </p>
-                <p>Ticket cost: {ticketCost / 1e18} ETH</p>
-                <p>Total Ticket pool: {numberOfTickets}</p>
-                <p>Owned tickets: {numberOfOwnedTickets}</p>
+                </div>
+
                 <br />
                 {isAdmin ? (
                     <p>
@@ -221,5 +225,5 @@ export default function LotteryEntrance() {
         return showUserInterface()
     }
 
-    return <div className="p-5">{showInterfaces()}</div>
+    return <div>{showInterfaces()}</div>
 }
