@@ -1,4 +1,4 @@
-const defaultWinner = "Nobody won recently. It could be you!"
+const defaultWinner = "No current pool"
 
 const bannerStyle = {
     border: "3px solid black",
@@ -7,14 +7,16 @@ const bannerStyle = {
     fontFamily: "Helvetica",
     margin: "20px",
     fontWeight: "500",
-    fontSize: "36px"
+    fontSize: "36px",
 }
 
-export default function Winner(props) {
+export default function PrizePool(props) {
     return (
         <div className="flex align-center justify-center">
             <div style={bannerStyle}>
-                {props?.address != 0? props?.address : defaultWinner.toString()}
+                {props?.pool != 0
+                    ? "Prize Pool: " + props?.pool + " ETH"
+                    : defaultWinner.toString()}
             </div>
         </div>
     )

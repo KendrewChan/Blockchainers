@@ -1,8 +1,7 @@
-import { useWeb3Contract, useMoralis, useWeb3ExecuteFunction } from "react-moralis"
+import { useWeb3Contract, useMoralis } from "react-moralis"
 import { useEffect, useState } from "react"
-import { ethers } from "ethers"
 import { useNotification } from "web3uikit"
-import Winner from "./Winner"
+import PrizePool from "./PrizePool"
 
 import contractAddresses from "../constants/contractAddresses.json"
 import abi from "../constants/abi.json"
@@ -21,6 +20,7 @@ export default function LotteryEntrance() {
     const [recentWinner, setRecentWinner] = useState("0")
     const [isAdmin, setIsAdmin] = useState(false)
     const [isAdminPage, setIsAdminPage] = useState(false)
+    const [newAdminAddr, setNewAdminAddr] = useState("")
 
     useEffect(() => {
         if (isWeb3Enabled) updateUI()
@@ -75,16 +75,23 @@ export default function LotteryEntrance() {
         params: {},
     })
 
-    // TODO: This function doesn't run for some reason
     const { runContractFunction: performUpkeep } = useWeb3Contract({
         abi: abi,
         contractAddress: raffleAddress,
         functionName: "performUpkeep",
-        params: { performData: 0x0 }, // I suspect sth wrong with this, but not sure
+        params: { performData: 0x0 },
+    })
+
+    const { runContractFunction: addAdmin } = useWeb3Contract({
+        abi: abi,
+        contractAddress: raffleAddress,
+        functionName: "addAdmin",
+        params: { _newAdmin: newAdminAddr },
     })
 
     async function updateUI() {
         const ticketCost = await getTicketCost()
+        setTicketCost(ticketCost)
 
         const numTicketsFromCall = (await getNumTickets()).toString()
         setNumberOfTickets(numTicketsFromCall)
@@ -110,10 +117,18 @@ export default function LotteryEntrance() {
         })
     }
 
-    const handleSuccess = async (tx) => {
+    const handleBuyTicketSuccess = async (tx) => {
         await tx.wait(1)
         handleNewNotification()
         updateUI()
+    }
+
+    const buyTicketBtn = async () => {
+        await buyTickets({
+            // onComplete:
+            onSuccess: handleBuyTicketSuccess, // When function is successful
+            onError: (err) => console.log(err),
+        })
     }
 
     const handleSelectWinnerSuccess = async (tx) => {
@@ -123,18 +138,10 @@ export default function LotteryEntrance() {
             message: "Winner Selected!",
             title: "Winner Selected",
             position: "topR",
+            icon: "bell",
         })
     }
 
-    const buyTicketBtn = async () => {
-        await buyTickets({
-            // onComplete:
-            onSuccess: handleSuccess, // When function is successful
-            onError: (err) => console.log(err),
-        })
-    }
-
-    // TODO: Not sure why this ain't working. It works with contract tho
     const selectWinnerBtn = async () => {
         await performUpkeep({
             onSuccess: handleSelectWinnerSuccess,
@@ -146,14 +153,33 @@ export default function LotteryEntrance() {
         setIsAdminPage(!isAdminPage)
     }
 
+    const handleAddAdminSuccess = async (tx) => {
+        await tx.wait(1)
+        dispatch({
+            type: "success",
+            message: "Admin Added!",
+            title: "Admin Added",
+            position: "topR",
+            icon: "bell",
+        })
+    }
+
+    const addNewAdmin = async () => {
+        await addAdmin({
+            onSuccess: handleAddAdminSuccess,
+            onError: (err) => console.log(err),
+        })
+    }
+
     const showUserInterface = () => {
+        const prizePool = (parseInt(numberOfTickets) * parseInt(ticketCost)) / 1e18
         return (
             <div className="flex flex-col justify-center items-center m-8">
                 <div className="flex flex-col justify-center items-center">
-                    <div className="pt-15">
-                        <h1 className="text-3xl">Recent Winner:</h1>
-                    </div>
-                    <Winner address={recentWinner}></Winner>
+                    <h1 className="text-base">
+                        <b>Recent Winner:</b> {recentWinner}
+                    </h1>
+                    <PrizePool pool={prizePool}></PrizePool>
                 </div>
 
                 <div className="flex flex-col items-center p-4">
@@ -193,17 +219,31 @@ export default function LotteryEntrance() {
         )
     }
 
-    // TODO: Add admin function to change ticket cost and add other admins
     const showAdminInterface = () => {
         return (
             <div>
-                <p>You are admin</p>
                 <p>
                     <button
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
                         onClick={changeAdminPage}
                     >
                         Back to lottery page
+                    </button>
+                </p>
+                <br />
+                <p>
+                    <b>Add New Admin: </b>
+                    <input
+                        type="text"
+                        placeholder="0x00000000..."
+                        onChange={(e) => setNewAdminAddr(e.target.value)}
+                        required
+                    />
+                    <button
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
+                        onClick={addNewAdmin}
+                    >
+                        Submit
                     </button>
                 </p>
                 <br />
