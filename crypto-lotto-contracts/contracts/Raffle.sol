@@ -87,24 +87,25 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         uint256, /* requestId */
         uint256[] memory randomWords
     ) internal override {
-        if (contestants.length == 0) revert RaffleHasNoBidders();
+        uint256 len = contestants.length;
+        if (len == 0) revert RaffleHasNoBidders();
         address[] memory rafflePool = new address[](totalNumTickets);
         uint256 raffleIdx = 0;
-        for (uint256 i = 0; i < contestants.length; i++) {
+        for (uint256 i = 0; i < len; i++) {
             address contestant = contestants[i];
             uint256 numTix = tickets[contestant];
             for (uint256 j = 0; j < numTix; j++) {
                 rafflePool[raffleIdx] = contestant;
-                raffleIdx++;
+                ++raffleIdx;
             }
             delete tickets[contestant];
         }
-        uint256 winningIdx = randomWords[0] % rafflePool.length;
+        uint256 winningIdx = randomWords[0] % raffleIdx;
         address winnerAddr = rafflePool[winningIdx];
         s_recentWinner = winnerAddr;
 
-        totalNumTickets = 0;
-        contestants = new address[](0);
+        delete totalNumTickets;
+        delete contestants;
         s_raffleState = RaffleState.OPEN;
         s_lastTimeStamp = block.timestamp;
         (bool callSuccess, ) = payable(winnerAddr).call{value: address(this).balance}("");
@@ -169,11 +170,12 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     /** Contract Functions */
     function buyTickets() public payable {
-        if (msg.value < i_tixCostWei) revert RaffleInsuficientFunds(msg.value, i_tixCostWei);
+        uint256 tixCostWei = i_tixCostWei;
+        if (msg.value < tixCostWei) revert RaffleInsuficientFunds(msg.value, tixCostWei);
 		if (s_raffleState != RaffleState.OPEN) revert RaffleNotOpen();
 
         if (tickets[msg.sender] == 0) contestants.push(msg.sender);
-        uint256 numTix = msg.value / i_tixCostWei;
+        uint256 numTix = msg.value / tixCostWei;
         tickets[msg.sender] += numTix;
         totalNumTickets += numTix;
 
