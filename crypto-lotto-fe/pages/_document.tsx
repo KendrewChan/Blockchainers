@@ -2,7 +2,7 @@ import { Html, Head, Main, NextScript } from "next/document"
 
 export default function MyDocument() {
     return (
-        <Html>
+        <Html className="h-full">
             <Head />
             <link rel="preconnect" href="https://fonts.googleapis.com" />
             <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -10,7 +10,7 @@ export default function MyDocument() {
                 href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
                 rel="stylesheet"
             />
-            <body>
+            <body className="h-full">
                 <Main />
                 <NextScript />
             </body>

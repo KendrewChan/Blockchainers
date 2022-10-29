@@ -6,7 +6,7 @@ import LotteryEntrance from "../components/LotteryEntrance"
 
 export default function Home() {
     return (
-        <div className={styles.container}>
+        <div className="h-full">
             <Head>
                 <title>Ethereum Lottery</title>
                 <meta name="description" content="Ethereum Lottery" />
