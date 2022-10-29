@@ -3,6 +3,9 @@ import { useEffect, useState } from "react"
 import { useNotification } from "web3uikit"
 import PrizePool from "./PrizePool"
 
+import { BigNumber } from "ethers"
+import { formatEther } from "ethers/lib/utils"
+
 import contractAddresses from "../constants/contractAddresses.json"
 import abi from "../constants/abi.json"
 
@@ -14,9 +17,9 @@ export default function LotteryEntrance() {
 
     const dispatch = useNotification()
 
-    const [ticketCost, setTicketCost] = useState("0")
-    const [numberOfTickets, setNumberOfTickets] = useState("0")
-    const [numberOfOwnedTickets, setOwnedTickets] = useState("0")
+    const [ticketCost, setTicketCost] = useState<BigNumber>(BigNumber.from(0))
+    const [totalTicketCount, setTotalTicketCount] = useState<BigNumber>(BigNumber.from(0))
+    const [ownedTicketCount, setOwnedTicketCount] = useState<BigNumber>(BigNumber.from(0))
     const [recentWinner, setRecentWinner] = useState("0")
     const [isAdmin, setIsAdmin] = useState(false)
     const [isAdminPage, setIsAdminPage] = useState(false)
@@ -36,7 +39,7 @@ export default function LotteryEntrance() {
         abi: abi,
         contractAddress: raffleAddress,
         functionName: "buyTickets",
-        msgValue: ticketCost,
+        msgValue: ticketCost.toString(),
         params: {},
     })
 
@@ -90,19 +93,19 @@ export default function LotteryEntrance() {
     })
 
     async function updateUI() {
-        const ticketCost = await getTicketCost()
+        const ticketCost = (await getTicketCost()) as BigNumber
         setTicketCost(ticketCost)
 
-        const numTicketsFromCall = (await getNumTickets()).toString()
-        setNumberOfTickets(numTicketsFromCall)
+        const numTicketsFromCall = (await getNumTickets()) as BigNumber
+        setTotalTicketCount(numTicketsFromCall)
 
-        const ownedTickets = (await getUserTickets()).toString()
-        setOwnedTickets(ownedTickets)
+        const ownedTickets = (await getUserTickets()) as BigNumber
+        setOwnedTicketCount(ownedTickets)
 
-        const recentWinnerFromCall = await getRecentWinner()
+        const recentWinnerFromCall = (await getRecentWinner()) as string
         setRecentWinner(recentWinnerFromCall)
 
-        const userStatus = await isUserAdmin()
+        const userStatus = (await isUserAdmin()) as boolean
         setIsAdmin(userStatus)
     }
 
@@ -123,7 +126,7 @@ export default function LotteryEntrance() {
         updateUI()
     }
 
-    const buyTicketBtn = async () => {
+    const handleBuyTicket = async () => {
         await buyTickets({
             // onComplete:
             onSuccess: handleBuyTicketSuccess, // When function is successful
@@ -172,26 +175,26 @@ export default function LotteryEntrance() {
     }
 
     const showUserInterface = () => {
-        const prizePool = (parseInt(numberOfTickets) * parseInt(ticketCost)) / 1e18
+        const prizePool = totalTicketCount.mul(ticketCost)
         return (
             <div className="flex flex-col justify-center items-center m-8">
                 <div className="flex flex-col justify-center items-center">
                     <h1 className="text-base">
                         <b>Recent Winner:</b> {recentWinner}
                     </h1>
-                    <PrizePool pool={prizePool}></PrizePool>
+                    <PrizePool pool={Number(formatEther(prizePool))}></PrizePool>
                 </div>
 
                 <div className="flex flex-col items-center p-4">
-                    <p>Ticket cost: {ticketCost / 1e18} ETH</p>
-                    <p>Total Ticket pool: {numberOfTickets}</p>
-                    <p>Owned tickets: {numberOfOwnedTickets}</p>
+                    <p>Ticket cost: {formatEther(ticketCost)} ETH</p>
+                    <p>Total Ticket pool: {totalTicketCount.toNumber()}</p>
+                    <p>Owned tickets: {ownedTicketCount.toNumber()}</p>
                 </div>
 
                 <div className="p-4">
                     <button
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
-                        onClick={buyTicketBtn}
+                        onClick={handleBuyTicket}
                         disabled={isLoading || isFetching}
                     >
                         {isLoading || isFetching ? (
