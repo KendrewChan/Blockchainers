@@ -2,6 +2,7 @@ import { useWeb3Contract, useMoralis } from "react-moralis"
 import { useEffect, useState } from "react"
 import { useNotification } from "web3uikit"
 import PrizePool from "./PrizePool"
+import ErrorBanner from "./ErrorBanner"
 
 import { BigNumber } from "ethers"
 import { formatEther } from "ethers/lib/utils"
@@ -9,6 +10,7 @@ import { formatEther } from "ethers/lib/utils"
 import contractAddresses from "../constants/contractAddresses.json"
 import abi from "../constants/abi.json"
 import { useForm } from "react-hook-form"
+
 
 export type BuyTicketFormData = {
     ticketCount: number
@@ -29,6 +31,8 @@ export default function LotteryEntrance() {
     const [isAdmin, setIsAdmin] = useState(false)
     const [isAdminPage, setIsAdminPage] = useState(false)
     const [newAdminAddr, setNewAdminAddr] = useState("")
+    const [buyError, setBuyError] = useState(false);
+    const [buyErrorMessage, setBuyErrorMessage] = useState("");
 
     const { register, watch, handleSubmit } = useForm<BuyTicketFormData>({
         defaultValues: {
@@ -143,7 +147,10 @@ export default function LotteryEntrance() {
         await buyTickets({
             // onComplete:
             onSuccess: handleBuyTicketSuccess, // When function is successful
-            onError: (err) => console.log(err),
+            onError: (err) => {
+                setBuyError(true)
+                setBuyErrorMessage(err.message)
+            },
         })
     }
 
@@ -221,8 +228,17 @@ export default function LotteryEntrance() {
 
                                 await buyTickets()
                             })}
-                            className="flex gap-2 flex-wrap"
+                            className="flex flex-col gap-2 flex-wrap item-center"
                         >
+                            <div className="flex item-center" >
+
+                            {buyError ?
+                                (<ErrorBanner error={buyErrorMessage} closeCB={() => {setBuyError(false)}}></ErrorBanner>)
+                                :  (<div></div>)
+                            }
+                            </div>
+                            <div className="flex gap-2 flex-wrap">
+
                             <input
                                 className="border-2 flex-1 border-gray-300 bg-white p-2 rounded text-sm focus:outline-none"
                                 type="number"
@@ -245,6 +261,7 @@ export default function LotteryEntrance() {
                                     )} ETH`
                                 )}
                             </button>
+                            </div>
                         </form>
                     </section>
                     {isAdmin ? (
@@ -266,19 +283,14 @@ export default function LotteryEntrance() {
 
     const showAdminInterface = () => {
         return (
-            <div>
-                <p>
-                    <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
-                        onClick={changeAdminPage}
-                    >
-                        Back to lottery page
-                    </button>
-                </p>
+            <div className="flex justify-center min-w-50" >
+            <div className="flex flex-col justify-center">
                 <br />
-                <p>
-                    <b>Add New Admin: </b>
+                <b>Add New Admin: </b>
+                <div className="flex ">
                     <input
+
+                        className="border-2 flex-1 border-gray-300 bg-white p-2 rounded text-sm focus:outline-none"
                         type="text"
                         placeholder="0x00000000..."
                         onChange={(e) => setNewAdminAddr(e.target.value)}
@@ -290,8 +302,17 @@ export default function LotteryEntrance() {
                     >
                         Submit
                     </button>
-                </p>
+                </div>
                 <br />
+                <div className="flex justify-between">
+                <div>
+                    <button
+                        className="bg-slate-400 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded ml-auto"
+                        onClick={changeAdminPage}
+                    >
+                        Back to lottery page
+                    </button>
+                </div>
                 <p>
                     <button
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
@@ -300,11 +321,14 @@ export default function LotteryEntrance() {
                         Select Winner
                     </button>
                 </p>
+                </div>
+            </div>
+
             </div>
         )
     }
 
     if (!raffleAddress) return <div>No Raffle Address detected</div>
-    if (isAdminPage) return showAdminInterface()
+    if (!isAdminPage) return showAdminInterface()
     return showUserInterface()
 }
