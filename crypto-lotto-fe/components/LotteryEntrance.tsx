@@ -193,7 +193,7 @@ export default function LotteryEntrance() {
             <div className="flex justify-center w-full">
                 <div className="flex flex-1 flex-col justify-center max-w-xl m-4 space-y-4">
                     <h1 className="text-4xl">Lottery</h1>
-                    <p className="font-bold text-ellipsis overflow-hidden">
+                    <p className="font-semibold text-ellipsis overflow-hidden">
                         Recent Winner: <p>{recentWinner}</p>
                     </p>
                     <section>
