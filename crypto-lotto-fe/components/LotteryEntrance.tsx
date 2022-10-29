@@ -20,6 +20,7 @@ export default function LotteryEntrance() {
     const [ticketCost, setTicketCost] = useState<BigNumber>(BigNumber.from(0))
     const [totalTicketCount, setTotalTicketCount] = useState<BigNumber>(BigNumber.from(0))
     const [ownedTicketCount, setOwnedTicketCount] = useState<BigNumber>(BigNumber.from(0))
+    const [toBuyCount, setToBuyCount] = useState(0)
     const [recentWinner, setRecentWinner] = useState("0")
     const [isAdmin, setIsAdmin] = useState(false)
     const [isAdminPage, setIsAdminPage] = useState(false)
@@ -39,7 +40,7 @@ export default function LotteryEntrance() {
         abi: abi,
         contractAddress: raffleAddress,
         functionName: "buyTickets",
-        msgValue: ticketCost.toString(),
+        msgValue: ticketCost.mul(toBuyCount).toString(),
         params: {},
     })
 
@@ -187,20 +188,30 @@ export default function LotteryEntrance() {
 
                 <div className="flex flex-col items-center p-4">
                     <p>Ticket cost: {formatEther(ticketCost)} ETH</p>
-                    <p>Total Ticket pool: {totalTicketCount.toNumber()}</p>
-                    <p>Owned tickets: {ownedTicketCount.toNumber()}</p>
+                    <p>Tickets in pool: {totalTicketCount.toNumber()}</p>
+                    <p>You have: {ownedTicketCount.toNumber()} tickets</p>
                 </div>
 
-                <div className="p-4">
+                <div className="p-4 flex gap-2">
+                    <input
+                        className="border-2 border-gray-300 bg-white h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none"
+                        type="number"
+                        name="toBuyCount"
+                        placeholder="Number of tickets to buy"
+                        min={1}
+                        onChange={(e) => setToBuyCount(Number(e.target.value))}
+                    />
                     <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto disabled:opacity-50"
                         onClick={handleBuyTicket}
-                        disabled={isLoading || isFetching}
+                        disabled={isLoading || isFetching || toBuyCount <= 0}
                     >
                         {isLoading || isFetching ? (
                             <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
                         ) : (
-                            "Enter Lottery"
+                            `Buy ${toBuyCount} tickets for ${formatEther(
+                                ticketCost.mul(toBuyCount)
+                            )} ETH`
                         )}
                     </button>
                 </div>
