@@ -125,10 +125,12 @@ contract PredictionGame is AutomationCompatibleInterface, ChainlinkClient, Confi
         for (uint i = 0; i< nextUpVoters.length; i++) {
                 address voter = nextUpVoters[i];
                 currentBids[voter] = nextBids[voter];
+                nextBids[voter] = 0;
         }
         for (uint i = 0; i< nextDownVoters.length; i++) {
                 address voter = nextDownVoters[i];
                 currentBids[voter] = nextBids[voter];
+                nextBids[voter] = 0;
         }
 
         currentUpVoters = nextUpVoters;
