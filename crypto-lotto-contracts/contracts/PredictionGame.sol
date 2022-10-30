@@ -166,10 +166,10 @@ contract PredictionGame is AutomationCompatibleInterface, ChainlinkClient, Confi
             nextBids[msg.sender] == 0,
             "You have already voted! Please wait for the next round to vote"
         );
-        require(
-            (block.timestamp - lastRoundEndTime) < maxVotingDuration,
-            "Voting for the next round has ended. Please wait for the next voting round to start!"
-        );
+//        require(
+//            (block.timestamp - lastRoundEndTime) < maxVotingDuration,
+//            "Voting for the next round has ended. Please wait for the next voting round to start!"
+//        );
 
         if (isVoteUp) {
             nextUpVoters.push(msg.sender);
