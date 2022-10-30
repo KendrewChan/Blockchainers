@@ -15,6 +15,8 @@ UPDATE_FRONT_END=true
 ```
 
 ## Running the project (localhost):
+Make sure to use version 16.17.1 of Node
+
 Add hardhat network to metamask:
 - Go to your wallet and add a new network. See instructions here.
   - Network Name: Hardhat-Localhost
