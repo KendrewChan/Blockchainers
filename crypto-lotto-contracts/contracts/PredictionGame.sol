@@ -144,8 +144,6 @@ contract PredictionGame is AutomationCompatibleInterface, ChainlinkClient, Confi
         nextPotSize = 0;
         nextUpPotSize = 0;
         nextDownPotSize = 0;
-
-        lastRoundPrice = currentRoundPrice;
     }
 
     /**
