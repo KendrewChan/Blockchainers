@@ -201,6 +201,7 @@ contract PredictionGame is AutomationCompatibleInterface, ChainlinkClient, Confi
         // We don't use the checkData. The checkData is defined when the Upkeep was registered.
     }
 
+    // Called every round duration.
     function performUpkeep(bytes calldata /* performData */) external override {
         //We highly recommend revalidating the upkeep in the performUpkeep function
         if ((block.timestamp - lastRoundEndTime) > roundDuration) {
