@@ -47,13 +47,19 @@ export default function PredictionGameEntrance() {
     }, [isWeb3Enabled])
 
     // For betting
-    const { register, watch, handleSubmit } = useForm<BuyTicketFormData>({
+    const {
+        register,
+        watch,
+        handleSubmit,
+        formState: { isDirty, isValid },
+    } = useForm<BuyTicketFormData>({
         defaultValues: {
             ticketBid: 1,
         },
     })
 
-    const toBet = watch("ticketBid")
+    const toBetRaw = watch("ticketBid")
+    const toBet = Number.isNaN(toBetRaw) ? 0 : toBetRaw
 
     // Set up FE interaction with the smart contract
     const {
@@ -251,7 +257,14 @@ export default function PredictionGameEntrance() {
                                 min={1}
                                 max={100000000000000000000}
                                 required={true}
-                                {...register("ticketBid", { required: true })}
+                                {...register("ticketBid", {
+                                    required: true,
+                                    valueAsNumber: true,
+                                    min: 1,
+                                    validate: (value) => {
+                                        return 1 <= value && value <= 100000000000000000000
+                                    },
+                                })}
                             />
                         </div>
                     </form>
@@ -261,6 +274,7 @@ export default function PredictionGameEntrance() {
                             color="success"
                             icon={<ArrowLongUpIcon className="w-8 h-8" />}
                             onClick={makeStonks}
+                            disabled={!isValid}
                         >
                             <div className="flex flex-col items-start text-start">
                                 <p className="font-semibold">Long</p>
@@ -271,6 +285,7 @@ export default function PredictionGameEntrance() {
                             color="danger"
                             icon={<ArrowLongDownIcon className="w-8 h-8" />}
                             onClick={makeNotStonks}
+                            disabled={!isValid}
                         >
                             <div className="flex flex-col items-start text-start">
                                 <p className="font-semibold">Short</p>
