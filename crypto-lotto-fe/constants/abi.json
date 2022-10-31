@@ -1,396 +1,936 @@
 [
-	{
-	  "type": "constructor",
-	  "payable": false,
-	  "inputs": [
-		{
-		  "type": "address",
-		  "name": "vrfCoordinatorV2"
-		},
-		{
-		  "type": "uint64",
-		  "name": "subId"
-		},
-		{
-		  "type": "bytes32",
-		  "name": "keyHash"
-		},
-		{
-		  "type": "uint256",
-		  "name": "interval"
-		},
-		{
-		  "type": "uint32",
-		  "name": "cbGasLimit"
-		}
-	  ]
-	},
-	{
-	  "type": "error",
-	  "name": "ErrorPayingWinner",
-	  "inputs": []
-	},
-	{
-	  "type": "error",
-	  "name": "OnlyCoordinatorCanFulfill",
-	  "inputs": [
-		{
-		  "type": "address",
-		  "name": "have"
-		},
-		{
-		  "type": "address",
-		  "name": "want"
-		}
-	  ]
-	},
-	{
-	  "type": "error",
-	  "name": "RaffleHasNoBidders",
-	  "inputs": []
-	},
-	{
-	  "type": "error",
-	  "name": "RaffleInsuficientFunds",
-	  "inputs": [
-		{
-		  "type": "uint256",
-		  "name": "msgValue"
-		},
-		{
-		  "type": "uint256",
-		  "name": "requiredValue"
-		}
-	  ]
-	},
-	{
-	  "type": "error",
-	  "name": "RaffleNotOpen",
-	  "inputs": []
-	},
-	{
-	  "type": "error",
-	  "name": "RaffleUpkeepNotNeeded",
-	  "inputs": [
-		{
-		  "type": "uint256",
-		  "name": "currentBalance"
-		},
-		{
-		  "type": "uint256",
-		  "name": "numPlayers"
-		},
-		{
-		  "type": "uint256",
-		  "name": "raffleState"
-		}
-	  ]
-	},
-	{
-	  "type": "error",
-	  "name": "Unauthorized",
-	  "inputs": []
-	},
-	{
-	  "type": "event",
-	  "anonymous": false,
-	  "name": "RaffleEnter",
-	  "inputs": [
-		{
-		  "type": "address",
-		  "name": "player",
-		  "indexed": true
-		}
-	  ]
-	},
-	{
-	  "type": "event",
-	  "anonymous": false,
-	  "name": "RequestedRaffleWinner",
-	  "inputs": [
-		{
-		  "type": "uint256",
-		  "name": "requestId",
-		  "indexed": true
-		}
-	  ]
-	},
-	{
-	  "type": "event",
-	  "anonymous": false,
-	  "name": "WinnerPicked",
-	  "inputs": [
-		{
-		  "type": "address",
-		  "name": "player",
-		  "indexed": true
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "addAdmin",
-	  "constant": false,
-	  "payable": false,
-	  "stateMutability": "nonpayable",
-	  "inputs": [
-		{
-		  "type": "address",
-		  "name": "_newAdmin"
-		}
-	  ],
-	  "outputs": []
-	},
-	{
-	  "type": "function",
-	  "name": "buyTickets",
-	  "constant": false,
-	  "stateMutability": "payable",
-	  "payable": true,
-	  "inputs": [],
-	  "outputs": []
-	},
-	{
-	  "type": "function",
-	  "name": "changeTicketCost",
-	  "constant": false,
-	  "payable": false,
-	  "inputs": [
-		{
-		  "type": "uint256",
-		  "name": "newTixCost"
-		}
-	  ],
-	  "outputs": []
-	},
-	{
-	  "type": "function",
-	  "name": "checkUpkeep",
-	  "constant": true,
-	  "stateMutability": "view",
-	  "payable": false,
-	  "inputs": [
-		{
-		  "type": "bytes"
-		}
-	  ],
-	  "outputs": [
-		{
-		  "type": "bool",
-		  "name": "upkeepNeeded"
-		},
-		{
-		  "type": "bytes"
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "getContestant",
-	  "constant": true,
-	  "stateMutability": "view",
-	  "payable": false,
-	  "inputs": [
-		{
-		  "type": "uint256",
-		  "name": "index"
-		}
-	  ],
-	  "outputs": [
-		{
-		  "type": "address"
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "getInterval",
-	  "constant": true,
-	  "stateMutability": "view",
-	  "payable": false,
-	  "inputs": [],
-	  "outputs": [
-		{
-		  "type": "uint256"
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "getLastTimeStamp",
-	  "constant": true,
-	  "stateMutability": "view",
-	  "payable": false,
-	  "inputs": [],
-	  "outputs": [
-		{
-		  "type": "uint256"
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "getNumContestants",
-	  "constant": true,
-	  "stateMutability": "view",
-	  "payable": false,
-	  "inputs": [],
-	  "outputs": [
-		{
-		  "type": "uint256"
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "getNumTickets",
-	  "constant": true,
-	  "stateMutability": "view",
-	  "payable": false,
-	  "inputs": [],
-	  "outputs": [
-		{
-		  "type": "uint256"
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "getNumWords",
-	  "constant": true,
-	  "stateMutability": "pure",
-	  "payable": false,
-	  "inputs": [],
-	  "outputs": [
-		{
-		  "type": "uint256"
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "getRaffleState",
-	  "constant": true,
-	  "stateMutability": "view",
-	  "payable": false,
-	  "inputs": [],
-	  "outputs": [
-		{
-		  "type": "uint8"
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "getRecentWinner",
-	  "constant": true,
-	  "stateMutability": "view",
-	  "payable": false,
-	  "inputs": [],
-	  "outputs": [
-		{
-		  "type": "address"
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "getRequestConfirmations",
-	  "constant": true,
-	  "stateMutability": "pure",
-	  "payable": false,
-	  "inputs": [],
-	  "outputs": [
-		{
-		  "type": "uint256"
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "getTicketCost",
-	  "constant": true,
-	  "stateMutability": "view",
-	  "payable": false,
-	  "inputs": [],
-	  "outputs": [
-		{
-		  "type": "uint256"
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "getUserTickets",
-	  "constant": true,
-	  "stateMutability": "view",
-	  "payable": false,
-	  "inputs": [],
-	  "outputs": [
-		{
-		  "type": "uint256"
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "isUserAdmin",
-	  "constant": true,
-	  "stateMutability": "view",
-	  "payable": false,
-	  "inputs": [],
-	  "outputs": [
-		{
-		  "type": "bool"
-		}
-	  ]
-	},
-	{
-	  "type": "function",
-	  "name": "performUpkeep",
-	  "constant": false,
-	  "payable": false,
-	  "stateMutability": "nonpayable",
-	  "inputs": [
-		{
-		  "name": "performData",
-		  "type": "bytes"
-		}
-	  ],
-	  "outputs": []
-	},
-	{
-	  "type": "function",
-	  "name": "rawFulfillRandomWords",
-	  "constant": false,
-	  "payable": false,
-	  "inputs": [
-		{
-		  "type": "uint256",
-		  "name": "requestId"
-		},
-		{
-		  "type": "uint256[]",
-		  "name": "randomWords"
-		}
-	  ],
-	  "outputs": []
-	},
-	{
-	  "type": "function",
-	  "name": "tickets",
-	  "constant": true,
-	  "stateMutability": "view",
-	  "payable": false,
-	  "inputs": [
-		{
-		  "type": "address"
-		}
-	  ],
-	  "outputs": [
-		{
-		  "type": "uint256"
-		}
-	  ]
-	}
-  ]
+  {
+    "type": "constructor",
+    "payable": false,
+    "inputs": [
+      {
+        "type": "address",
+        "name": "vrfCoordinatorV2"
+      },
+      {
+        "type": "uint64",
+        "name": "subId"
+      },
+      {
+        "type": "bytes32",
+        "name": "keyHash"
+      },
+      {
+        "type": "uint256",
+        "name": "interval"
+      },
+      {
+        "type": "uint32",
+        "name": "cbGasLimit"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ErrorPayingWinner",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OnlyCoordinatorCanFulfill",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "have"
+      },
+      {
+        "type": "address",
+        "name": "want"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "RaffleHasNoBidders",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "RaffleInsuficientFunds",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "msgValue"
+      },
+      {
+        "type": "uint256",
+        "name": "requiredValue"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "RaffleNotOpen",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "RaffleUpkeepNotNeeded",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "currentBalance"
+      },
+      {
+        "type": "uint256",
+        "name": "numPlayers"
+      },
+      {
+        "type": "uint256",
+        "name": "raffleState"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "Unauthorized",
+    "inputs": []
+  },
+  {
+    "type": "event",
+    "anonymous": false,
+    "name": "RaffleEnter",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "player",
+        "indexed": true
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "anonymous": false,
+    "name": "RequestedRaffleWinner",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "requestId",
+        "indexed": true
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "anonymous": false,
+    "name": "WinnerPicked",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "player",
+        "indexed": true
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "addAdmin",
+    "constant": false,
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "_newAdmin"
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "buyTickets",
+    "constant": false,
+    "stateMutability": "payable",
+    "payable": true,
+    "inputs": [],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "changeTicketCost",
+    "constant": false,
+    "payable": false,
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "newTixCost"
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "checkUpkeep",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "bool",
+        "name": "upkeepNeeded"
+      },
+      {
+        "type": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getContestant",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "index"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getInterval",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getLastTimeStamp",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getNumContestants",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getNumTickets",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getNumWords",
+    "constant": true,
+    "stateMutability": "pure",
+    "payable": false,
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getRaffleState",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "uint8"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getRecentWinner",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getRequestConfirmations",
+    "constant": true,
+    "stateMutability": "pure",
+    "payable": false,
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getTicketCost",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getUserTickets",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "isUserAdmin",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "performUpkeep",
+    "constant": false,
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "inputs": [
+      {
+        "name": "performData",
+        "type": "bytes"
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "rawFulfillRandomWords",
+    "constant": false,
+    "payable": false,
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "requestId"
+      },
+      {
+        "type": "uint256[]",
+        "name": "randomWords"
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "tickets",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [
+      {
+        "type": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_minBid",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_roundDuration",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_cooldownDuration",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "id",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ChainlinkCancelled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "id",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ChainlinkFulfilled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "id",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ChainlinkRequested",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferRequested",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "requestId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "volume",
+        "type": "uint256"
+      }
+    ],
+    "name": "RequestVolume",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "acceptOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "name": "checkUpkeep",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "upkeepNeeded",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "currentBids",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentDownPotSize",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "currentDownVoters",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentPotSize",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentRoundPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentUpPotSize",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "currentUpVoters",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "_requestId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_volume",
+        "type": "uint256"
+      }
+    ],
+    "name": "fulfill",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lastRoundEndTime",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lastRoundPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "maxVotingDuration",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "minBid",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "nextBids",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nextDownPotSize",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "nextDownVoters",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nextPotSize",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nextUpPotSize",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "nextUpVoters",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "pendingReturns",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "name": "performUpkeep",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "isVoteUp",
+        "type": "bool"
+      }
+    ],
+    "name": "placeBet",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "requestEthereumPrice",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "requestId",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "roundDuration",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "withdraw",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "withdrawLink",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
