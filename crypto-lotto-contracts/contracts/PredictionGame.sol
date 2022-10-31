@@ -87,7 +87,7 @@ contract PredictionGame is AutomationCompatibleInterface, ChainlinkClient, Confi
         req.add("path", "USD"); // Chainlink nodes 1.0.0 and later support this format
 
         // Multiply the result by 100 to remove decimals
-        int256 timesAmount = 10**2;
+        int256 timesAmount = 100;
         req.addInt("times", timesAmount);
 
         // Sends the request
@@ -102,32 +102,41 @@ contract PredictionGame is AutomationCompatibleInterface, ChainlinkClient, Confi
         lastRoundPrice = currentRoundPrice;
         currentRoundPrice = _volume;
 
-        if (currentRoundPrice >= lastRoundPrice) {
-            for (uint i = 0; i < currentUpVoters.length; i++) {
-                address voter = currentUpVoters[i];
-                pendingReturns[voter] += (currentBids[voter]/ currentUpPotSize) * currentPotSize;
+        uint currentUpVotersLength = currentUpVoters.length;
+        uint currentDownVotersLength = currentDownVoters.length;
+        uint _currentPotSize = currentPotSize;
+        uint _currentUpPotSize = currentUpPotSize;
+        uint _currentDownPotSize = currentDownPotSize;
+
+        if (currentRoundPrice < lastRoundPrice) {
+            for (uint i = 0; i < currentDownVotersLength; i++) {
+                address voter = currentDownVoters[i];
+                pendingReturns[voter] += (currentBids[voter]/ _currentDownPotSize) * _currentPotSize;
                 currentBids[voter] = 0;
             }
-            for (uint i = 0; i < currentDownVoters.length; i++) {
-                currentBids[currentDownVoters[i]] = 0;
+            for (uint i = 0; i < currentUpVotersLength; i++) {
+                currentBids[currentUpVoters[i]] = 0;
             }
         } else {
-            for (uint i = 0; i < currentDownVoters.length; i++) {
-                address voter = currentDownVoters[i];
-                pendingReturns[voter] += (currentBids[voter]/ currentDownPotSize) * currentPotSize;
+            for (uint i = 0; i < currentUpVotersLength; i++) {
+                address voter = currentUpVoters[i];
+                pendingReturns[voter] += (currentBids[voter]/ _currentUpPotSize) * _currentPotSize;
                 currentBids[voter] = 0;
             }
-            for (uint i = 0; i < currentUpVoters.length; i++) {
-                currentBids[currentUpVoters[i]] = 0;
+            for (uint i = 0; i < currentDownVotersLength; i++) {
+                currentBids[currentDownVoters[i]] = 0;
             }
         }
 
-        for (uint i = 0; i< nextUpVoters.length; i++) {
+        uint nextUpVotersLength = nextUpVoters.length;
+        uint nextDownVotersLength = nextDownVoters.length;
+
+        for (uint i = 0; i< nextUpVotersLength; i++) {
                 address voter = nextUpVoters[i];
                 currentBids[voter] = nextBids[voter];
                 nextBids[voter] = 0;
         }
-        for (uint i = 0; i< nextDownVoters.length; i++) {
+        for (uint i = 0; i< nextDownVotersLength; i++) {
                 address voter = nextDownVoters[i];
                 currentBids[voter] = nextBids[voter];
                 nextBids[voter] = 0;
