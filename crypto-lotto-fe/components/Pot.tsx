@@ -1,7 +1,11 @@
+import {formatEther} from "ethers/lib/utils";
+import {BigNumber} from "ethers";
+
 export type PotProps = {
     label: string,
     currentPrice: number,
     previousPrice: number,
+    prizePool: BigNumber
 }
 
 const potUp = (lightUp) => {
@@ -61,11 +65,12 @@ const potDown = (lightUp) => {
 export default function Pot(args: PotProps) {
     return (
         <div style={{
-            "background": "#eeeeee",
             "borderRadius": "5px",
             "borderColor": "red",
         }}>
-            <p>
+            <p
+                className="text-center"
+            >
                 {args.label}
             </p>
             {potUp(args.currentPrice > args.previousPrice)}
@@ -76,6 +81,12 @@ export default function Pot(args: PotProps) {
                     "textAlign": "center"
                 }}
             >
+                <h2 className="text-2xl mb-1">{args.label == "Current Pot" ? "Current Pool" : "Previous Pool"}</h2>
+                        <div className="border border-blue-700 p-4 rounded-lg">
+                            <p className="text-0.1xs font-light font-mono">{`${formatEther(
+                                args.prizePool
+                            )} ETH`}</p>
+                        </div>
                 <p>
                     Last Price {args.previousPrice}
                 </p>
