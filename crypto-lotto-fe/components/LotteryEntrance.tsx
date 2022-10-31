@@ -224,8 +224,6 @@ export default function LotteryEntrance() {
                         <p>Cost: {formatEther(ticketCost)} ETH/ticket</p>
                         <form
                             onSubmit={handleSubmit(async (data) => {
-                                console.log("hi", data)
-
                                 await buyTickets()
                             })}
                             className="flex flex-col gap-2 flex-wrap item-center"
@@ -329,6 +327,6 @@ export default function LotteryEntrance() {
     }
 
     if (!raffleAddress) return <div>No Raffle Address detected</div>
-    if (!isAdminPage) return showAdminInterface()
+    if (isAdminPage) return showAdminInterface()
     return showUserInterface()
 }
