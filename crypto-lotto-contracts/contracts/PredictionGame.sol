@@ -175,7 +175,7 @@ contract PredictionGame is AutomationCompatibleInterface, ChainlinkClient, Confi
     */
     function placeBet(bool isVoteUp) public payable {
         require(
-            msg.value > minBid,
+            msg.value >= minBid,
             "Bet is too small, please place a higher bet!"
         );
         require(
