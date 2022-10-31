@@ -30,6 +30,7 @@ contract PredictionGame is AutomationCompatibleInterface, ChainlinkClient, Confi
 
     // Parameters for next round bidding
     mapping(address => uint) public nextBids;
+    mapping(address => uint) public nextVoters; // 0 for nothing 1 for up 2 for down
     address[] public nextUpVoters;
     address[] public nextDownVoters;
     uint public nextPotSize;
@@ -38,6 +39,7 @@ contract PredictionGame is AutomationCompatibleInterface, ChainlinkClient, Confi
 
     // Parameters for current round bidding
     mapping(address => uint) public currentBids;
+    mapping(address => uint) public currentVoters;
     address[] public currentUpVoters;
     address[] public currentDownVoters;
     uint public currentPotSize;
@@ -132,14 +134,18 @@ contract PredictionGame is AutomationCompatibleInterface, ChainlinkClient, Confi
         uint nextDownVotersLength = nextDownVoters.length;
 
         for (uint i = 0; i< nextUpVotersLength; i++) {
-                address voter = nextUpVoters[i];
-                currentBids[voter] = nextBids[voter];
-                nextBids[voter] = 0;
+            address voter = nextUpVoters[i];
+            currentBids[voter] = nextBids[voter];
+            nextBids[voter] = 0;
+            currentVoters[voter] = 1;
+            nextVoters[voter] = 0;
         }
         for (uint i = 0; i< nextDownVotersLength; i++) {
-                address voter = nextDownVoters[i];
-                currentBids[voter] = nextBids[voter];
-                nextBids[voter] = 0;
+            address voter = nextDownVoters[i];
+            currentBids[voter] = nextBids[voter];
+            nextBids[voter] = 0;
+            currentVoters[voter] = 2;
+            nextVoters[voter] = 0;
         }
 
         currentUpVoters = nextUpVoters;
@@ -147,6 +153,7 @@ contract PredictionGame is AutomationCompatibleInterface, ChainlinkClient, Confi
         currentPotSize = nextPotSize;
         currentUpPotSize = nextUpPotSize;
         currentDownPotSize = nextDownPotSize;
+
 
         delete nextUpVoters;
         delete nextDownVoters;
@@ -183,9 +190,11 @@ contract PredictionGame is AutomationCompatibleInterface, ChainlinkClient, Confi
         if (isVoteUp) {
             nextUpVoters.push(msg.sender);
             nextUpPotSize += msg.value;
+            nextVoters[msg.sender] = 1;
         } else {
             nextDownVoters.push(msg.sender);
             nextDownPotSize += msg.value;
+            nextVoters[msg.sender] = 2;
         }
         nextPotSize += msg.value;
         nextBids[msg.sender] += msg.value;

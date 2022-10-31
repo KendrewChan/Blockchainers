@@ -1,33 +1,49 @@
-import { useWeb3Contract, useMoralis } from "react-moralis"
-import { useEffect, useState } from "react"
-import { useNotification } from "web3uikit"
+import {useWeb3Contract, useMoralis} from "react-moralis"
+import {useEffect, useState} from "react"
+import {useNotification} from "web3uikit"
 import PrizePool from "./PrizePool"
 import ErrorBanner from "./ErrorBanner"
 
-import { BigNumber } from "ethers"
-import { formatEther } from "ethers/lib/utils"
+import {BigNumber} from "ethers"
+import {formatEther, parseEther} from "ethers/lib/utils"
 
 import contractAddresses from "../constants/contractAddresses.json"
 import abi from "../constants/abi.json"
-import { useForm } from "react-hook-form"
+import {useForm} from "react-hook-form"
 import Moralis from "moralis"
 import web3 = Moralis.web3
 import Pot from "./Pot"
-import { ArrowLongDownIcon, ArrowLongUpIcon } from "@heroicons/react/20/solid"
+import {ArrowLongDownIcon, ArrowLongUpIcon} from "@heroicons/react/20/solid"
 import ArrowCircleDown from "web3uikit/src/components/Icon/icons/arrow-circle-down"
 import Button from "./Button"
+import TradingViewWidget from 'react-tradingview-widget';
+import {Simulate} from "react-dom/test-utils";
+import load = Simulate.load;
+import dynamic from 'next/dynamic'
+
+const DynamicTradingView = dynamic(
+    () => import('react-tradingview-widget'),
+    {ssr: false}
+)
 
 export type BuyTicketFormData = {
     ticketBid: number
 }
 
 export default function PredictionGameEntrance() {
-    const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
+    const {account, chainId: chainIdHex, isWeb3Enabled} = useMoralis()
     const chainId = parseInt(chainIdHex)
+    console.log(account);
+    useEffect(() => {
+        account && console.log(account);
+    }, [account]);
+
     // const raffleAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
     const raffleAddress = "0x0CE93bDd0f47F5ee8fAd04F8cb9E38Ee54F1aF80"
 
     const dispatch = useNotification()
+
+    // Upkeep -> Set the hasBidded back to False
 
     // Interaction with the smart contract
     const [ticketBid, setTicketBid] = useState<BigNumber>(BigNumber.from(0))
@@ -39,6 +55,11 @@ export default function PredictionGameEntrance() {
     const [minBid, setMinBid] = useState<BigNumber>(BigNumber.from(0))
     const [roundDuration, setRoundDuration] = useState<BigNumber>(BigNumber.from(0))
     const [currentPotsize, setCurrentPotsize] = useState<BigNumber>(BigNumber.from(0))
+    const [currentUpPotsize, setCurrentUpPotsize] = useState<BigNumber>(BigNumber.from(0))
+    const [currentDownPotsize, setCurrentDownPotsize] = useState<BigNumber>(BigNumber.from(0))
+    const [nextPotsize, setNextPotsize] = useState<BigNumber>(BigNumber.from(0))
+    const [nextUpPotsize, setNextUpPotsize] = useState<BigNumber>(BigNumber.from(0))
+    const [nextDownPotsize, setNextDownPotsize] = useState<BigNumber>(BigNumber.from(0))
     const [buyError, setBuyError] = useState(false)
     const [buyErrorMessage, setBuyErrorMessage] = useState("")
 
@@ -51,12 +72,17 @@ export default function PredictionGameEntrance() {
         register,
         watch,
         handleSubmit,
-        formState: { isDirty, isValid },
+        formState: {isDirty, isValid},
     } = useForm<BuyTicketFormData>({
         defaultValues: {
             ticketBid: 1,
         },
     })
+
+    // For truncating BigNumber for display
+    const truncate = (wei: BigNumber) => {
+        return wei.div(10000).mul(10000)
+    }
 
     const toBetRaw = watch("ticketBid")
     const toBet = Number.isNaN(toBetRaw) ? 0 : toBetRaw
@@ -71,42 +97,106 @@ export default function PredictionGameEntrance() {
         abi: abi,
         contractAddress: raffleAddress,
         functionName: "placeBet",
-        msgValue: ticketBid.toString(),
-        params: { isVoteUp: direction },
+        msgValue: parseEther(toBet.toString()).toString(),
+        params: {isVoteUp: direction},
     })
 
-    const { runContractFunction: withdraw } = useWeb3Contract({
+    const {runContractFunction: withdraw} = useWeb3Contract({
         abi: abi,
         contractAddress: raffleAddress,
         functionName: "withdraw",
         params: {},
     })
 
-    const { runContractFunction: getCurrentPrice } = useWeb3Contract({
+    const {runContractFunction: getCurrentBid} = useWeb3Contract({
+        abi: abi,
+        contractAddress: raffleAddress,
+        functionName: "currentBids",
+        params: { "": account },
+    })
+
+    const {runContractFunction: getCurrentPrice} = useWeb3Contract({
         abi: abi,
         contractAddress: raffleAddress,
         functionName: "currentRoundPrice",
     })
 
-    const { runContractFunction: getMinBid } = useWeb3Contract({
+    const {runContractFunction: getCurrentPotsize} = useWeb3Contract({
+        abi: abi,
+        contractAddress: raffleAddress,
+        functionName: "currentPotSize",
+    })
+
+    const {runContractFunction: getCurrentDownPotsize} = useWeb3Contract({
+        abi: abi,
+        contractAddress: raffleAddress,
+        functionName: "currentDownPotSize",
+    })
+
+    const {runContractFunction: getCurrentUpPotsize} = useWeb3Contract({
+        abi: abi,
+        contractAddress: raffleAddress,
+        functionName: "currentUpPotSize",
+    })
+
+    const {runContractFunction: getNextPotsize} = useWeb3Contract({
+        abi: abi,
+        contractAddress: raffleAddress,
+        functionName: "nextPotSize",
+    })
+
+    const {runContractFunction: getNextDownPotsize} = useWeb3Contract({
+        abi: abi,
+        contractAddress: raffleAddress,
+        functionName: "nextDownPotSize",
+    })
+
+    const {runContractFunction: getNextUpPotsize} = useWeb3Contract({
+        abi: abi,
+        contractAddress: raffleAddress,
+        functionName: "nextUpPotSize",
+    })
+
+    const {runContractFunction: getMinBid} = useWeb3Contract({
         abi: abi,
         contractAddress: raffleAddress,
         functionName: "minBid",
     })
 
-    const { runContractFunction: checkUpkeep } = useWeb3Contract({
+    const {runContractFunction: checkUpkeep} = useWeb3Contract({
         abi: abi,
         contractAddress: raffleAddress,
         functionName: "checkUpkeep",
-        params: { performData: 0x00 },
+        params: {performData: 0x00},
     })
 
     async function updateUI() {
         // Update when someone else bets on the pot or pot ends
-        const currentPrice = (await getCurrentPrice()) as BigNumber
-        setCurrentPrice(currentPrice)
+        setLastPrice(currentPrice);
+
+        const newCurrentPrice = (await getCurrentPrice()) as BigNumber
+        setCurrentPrice(newCurrentPrice)
+
+        const currentPotSize = (await getCurrentPotsize()) as BigNumber
+        setCurrentPotsize(currentPotSize);
+
+        const currentDownPotSize = (await getCurrentDownPotsize()) as BigNumber
+        setCurrentDownPotsize(currentDownPotSize);
+
+        const currentUpPotSize = (await getCurrentUpPotsize()) as BigNumber
+        setCurrentUpPotsize(currentUpPotSize);
+
+        const nextPoolSize = (await getNextPotsize()) as BigNumber
+        setNextPotsize(nextPoolSize);
+
+        const nextDownPotSize = (await getNextDownPotsize()) as BigNumber
+        setNextDownPotsize(nextDownPotSize);
+
+        const nextUpPotSize = (await getNextUpPotsize()) as BigNumber
+        setNextUpPotsize(nextUpPotSize);
 
         const minBid = (await getMinBid()) as BigNumber
+        console.log("minBid " + formatEther(minBid.toString()));
         setMinBid(minBid)
     }
 
@@ -126,73 +216,35 @@ export default function PredictionGameEntrance() {
         handleNewNotification()
         updateUI()
     }
-
-    const showPreviousPot = () => {
-        return (
-            <Pot
-                label={"Previous Pot"}
-                currentPrice={10}
-                previousPrice={6}
-                prizePool={BigNumber.from(1000)}
-            ></Pot>
-        )
-    }
-
+    // Upkeep -> New round
     const showCurrentPot = () => {
         return (
             <Pot
-                label={"Current Pot"}
-                currentPrice={10}
-                previousPrice={5}
+                label={"Previous Pot"}
+                currentPrice={formatEther(truncate(currentPotsize)).toString()}
                 prizePool={BigNumber.from(1000)}
             ></Pot>
         )
     }
 
-    const makeStonks = () => {
+    const showNextPot = () => {
+        return (
+            <Pot
+                label={"Next Pot"}
+                currentPrice={formatEther(truncate(nextPotsize)).toString()}
+                prizePool={BigNumber.from(1000)}
+            ></Pot>
+        )
+    }
+
+    const makeStonks = async () => {
         setDirection(true)
+        await placeBet()
     }
 
-    const makeNotStonks = () => {
+    const makeNotStonks = async () => {
         setDirection(false)
-    }
-
-    const stonks = () => {
-        return (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                className="w-6 h-6"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M8.25 6.75L12 3m0 0l3.75 3.75M12 3v18"
-                />
-            </svg>
-        )
-    }
-
-    const notStonks = () => {
-        return (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                className="w-6 h-6"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15.75 17.25L12 21m0 0l-3.75-3.75M12 21V3"
-                />
-            </svg>
-        )
+        await placeBet()
     }
 
     const handlePlaceBet = async () => {
@@ -210,89 +262,94 @@ export default function PredictionGameEntrance() {
     const showUserInterface = () => {
         return (
             <div className="w-full flex justify-center">
-                <div className="flex flex-col max-w-xl">
-                    <div
-                        className="flex flex-1 flex-col justify-center max-w-xl m-4 space-y-4"
-                        style={{
-                            display: "flex",
-                        }}
-                    >
-                        <h1 className="text-4xl">Prediction Game</h1>
-                        <p className="font-semibold text-ellipsis overflow-hidden">
-                            Current Pot Size: {currentPotsize.toString()}
-                        </p>
+                <div className="flex flex-col items-center gap-4">
+                    <div className="flex flex-col max-w-xl">
                         <div
-                            className={"container"}
+                            className="flex flex-1 flex-col justify-center max-w-xl m-4 space-y-4"
                             style={{
                                 display: "flex",
                             }}
                         >
-                            {showPreviousPot()}
-                            {showCurrentPot()}
+                            <h1 className="text-4xl">Prediction Game</h1>
+                            <p className="font-semibold text-ellipsis overflow-hidden">
+                                Current Pot Size: {currentPotsize.toString()}
+                            </p>
+                            <div
+                                className={"container"}
+                                style={{
+                                    display: "flex",
+                                }}
+                            >
+                                {showCurrentPot()}
+                                {showNextPot()}
+                            </div>
+                        </div>
+                        <p>
+                            Your bid for the next round
+                        </p>
+                        <form
+                            onSubmit={handleSubmit(async (data) => {
+                                console.log("hi", data)
+                                await placeBet()
+                            })}
+                            className="flex flex-col gap-2 flex-wrap item-center"
+                        >
+                            <div className="flex item-center">
+                                {buyError && (
+                                    <ErrorBanner
+                                        error={buyErrorMessage}
+                                        closeCB={() => {
+                                            setBuyError(false)
+                                        }}
+                                    ></ErrorBanner>
+                                )}
+                            </div>
+                            <div className="flex gap-2 flex-wrap">
+                                <input
+                                    className="border-2 flex-1 border-gray-300 bg-white p-2 rounded text-sm focus:outline-none"
+                                    type="number"
+                                    placeholder="Number of tickets to buy"
+                                    min={1}
+                                    max={100000000000000000000}
+                                    required={true}
+                                    {...register("ticketBid", {
+                                        required: true,
+                                        valueAsNumber: true,
+                                        min: 1,
+                                        validate: (value) => {
+                                            return 1 <= value && value <= 100000000000000000000
+                                        },
+                                    })}
+                                />
+                            </div>
+                        </form>
+                        <p>Minimum bid: {formatEther(minBid)} ETH</p>
+                        <div className="flex gap-4">
+                            <Button
+                                color="success"
+                                icon={<ArrowLongUpIcon className="w-8 h-8"/>}
+                                onClick={makeStonks}
+                                disabled={!isValid}
+                            >
+                                <div className="flex flex-col items-start text-start">
+                                    <p className="font-semibold">Long</p>
+                                    <p>{toBet} ETH</p>
+                                </div>
+                            </Button>
+                            <Button
+                                color="danger"
+                                icon={<ArrowLongDownIcon className="w-8 h-8"/>}
+                                onClick={makeNotStonks}
+                                disabled={!isValid}
+                            >
+                                <div className="flex flex-col items-start text-start">
+                                    <p className="font-semibold">Short</p>
+                                    <p>{toBet} ETH</p>
+                                </div>
+                            </Button>
                         </div>
                     </div>
-                    <form
-                        onSubmit={handleSubmit(async (data) => {
-                            console.log("hi", data)
-
-                            await placeBet()
-                        })}
-                        className="flex flex-col gap-2 flex-wrap item-center"
-                    >
-                        <div className="flex item-center">
-                            {buyError && (
-                                <ErrorBanner
-                                    error={buyErrorMessage}
-                                    closeCB={() => {
-                                        setBuyError(false)
-                                    }}
-                                ></ErrorBanner>
-                            )}
-                        </div>
-                        <div className="flex gap-2 flex-wrap">
-                            <input
-                                className="border-2 flex-1 border-gray-300 bg-white p-2 rounded text-sm focus:outline-none"
-                                type="number"
-                                placeholder="Number of tickets to buy"
-                                min={1}
-                                max={100000000000000000000}
-                                required={true}
-                                {...register("ticketBid", {
-                                    required: true,
-                                    valueAsNumber: true,
-                                    min: 1,
-                                    validate: (value) => {
-                                        return 1 <= value && value <= 100000000000000000000
-                                    },
-                                })}
-                            />
-                        </div>
-                    </form>
-                    <p>Minimum bid: {formatEther(minBid)} ETH</p>
-                    <div className="flex gap-2">
-                        <Button
-                            color="success"
-                            icon={<ArrowLongUpIcon className="w-8 h-8" />}
-                            onClick={makeStonks}
-                            disabled={!isValid}
-                        >
-                            <div className="flex flex-col items-start text-start">
-                                <p className="font-semibold">Long</p>
-                                <p>{formatEther(toBet)} ETH</p>
-                            </div>
-                        </Button>
-                        <Button
-                            color="danger"
-                            icon={<ArrowLongDownIcon className="w-8 h-8" />}
-                            onClick={makeNotStonks}
-                            disabled={!isValid}
-                        >
-                            <div className="flex flex-col items-start text-start">
-                                <p className="font-semibold">Short</p>
-                                <p>{formatEther(toBet)} ETH</p>
-                            </div>
-                        </Button>
-                    </div>
+                    <DynamicTradingView/>
                 </div>
             </div>
         )

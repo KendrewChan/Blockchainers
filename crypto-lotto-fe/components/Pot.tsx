@@ -3,14 +3,14 @@ import {BigNumber} from "ethers";
 
 export type PotProps = {
     label: string,
-    currentPrice: number,
-    previousPrice: number,
+    currentPrice: string,
     prizePool: BigNumber
 }
 
 const potUp = (lightUp) => {
     return (
-        <svg height="65px" width="240px" viewBox="0 0 240 65" fill={lightUp ? "green" : "black"} xmlns="http://www.w3.org/2000/svg"
+        <svg height="65px" width="240px" viewBox="0 0 240 65" fill={lightUp ? "green" : "black"}
+             xmlns="http://www.w3.org/2000/svg"
              className="sc-4ba21b47-0 IIbzK">
             <g filter="url(#filter0_i)">
                 <path
@@ -37,7 +37,8 @@ const potUp = (lightUp) => {
 
 const potDown = (lightUp) => {
     return (
-        <svg height="65px" width="240px" viewBox="0 0 240 65" fill={lightUp ? "red" : "black"} xmlns="http://www.w3.org/2000/svg"
+        <svg height="65px" width="240px" viewBox="0 0 240 65" fill={lightUp ? "red" : "black"}
+             xmlns="http://www.w3.org/2000/svg"
              className="sc-4ba21b47-0 IIbzK">
             <g filter="url(#filter0_i)">
                 <path
@@ -73,7 +74,7 @@ export default function Pot(args: PotProps) {
             >
                 {args.label}
             </p>
-            {potUp(args.currentPrice > args.previousPrice)}
+            {potUp(true )}
             <div
                 style={{
                     "borderColor": "grey",
@@ -81,20 +82,17 @@ export default function Pot(args: PotProps) {
                     "textAlign": "center"
                 }}
             >
-                <h2 className="text-2xl mb-1">{args.label == "Current Pot" ? "Current Pool" : "Previous Pool"}</h2>
-                        <div className="border border-blue-700 p-4 rounded-lg">
-                            <p className="text-0.1xs font-light font-mono">{`${formatEther(
-                                args.prizePool
-                            )} ETH`}</p>
-                        </div>
-                <p>
-                    Last Price {args.previousPrice}
-                </p>
-                <p>
-                    Current Price {args.currentPrice}
-                </p>
+                <h2 className="text-2xl mb-1">{args.label == "Next Pot" ? "Next Pool" : "Current Pool"}</h2>
+                <div className="border border-blue-700 p-4 rounded-lg">
+                    <p className="text-0.1xs font-light font-mono">{`${args.currentPrice} ETH`}</p>
+                </div>
+                {args.currentPrice != "" && <>
+                    <p>
+                        Round Price {args.currentPrice}
+                    </p>
+                </>}
             </div>
-            {potDown(args.currentPrice < args.previousPrice)}
+            {potDown(true )}
         </div>
     );
 }
