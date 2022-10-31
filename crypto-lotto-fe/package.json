@@ -28,6 +28,7 @@
 		"react-native-tab-view": "^3.3.0",
 		"react-tabs": "^5.1.0",
 		"react-tradingview-widget": "^1.3.2",
+		"web3": "^1.8.0",
 		"web3uikit": "^0.1.159"
 	},
 	"devDependencies": {
