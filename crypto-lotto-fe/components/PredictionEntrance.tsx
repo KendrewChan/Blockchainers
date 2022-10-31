@@ -23,7 +23,8 @@ export type BuyTicketFormData = {
 export default function PredictionGameEntrance() {
     const {chainId: chainIdHex, isWeb3Enabled} = useMoralis()
     const chainId = parseInt(chainIdHex)
-    const raffleAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
+    // const raffleAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
+    const raffleAddress = "0x0CE93bDd0f47F5ee8fAd04F8cb9E38Ee54F1aF80";
 
     const dispatch = useNotification()
 
@@ -31,7 +32,7 @@ export default function PredictionGameEntrance() {
     const [ticketBid, setTicketBid] = useState<BigNumber>(BigNumber.from(0));
     const [lastPrice, setLastPrice] = useState<BigNumber>(BigNumber.from(0));
     const [currentPrice, setCurrentPrice] = useState<BigNumber>(BigNumber.from(0));
-    const [direction, setDirection] = useState<boolean>(undefined);
+    const [direction, setDirection] = useState<boolean>(false);
     const [hasBidded, setHasBidded] = useState<boolean>(false);
     const [pricePool, setPricePool] = useState<BigNumber>(BigNumber.from(0));
     const [minBid, setMinBid] = useState<BigNumber>(BigNumber.from(0));

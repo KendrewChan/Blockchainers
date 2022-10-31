@@ -16,6 +16,7 @@ module.exports = {
     networks: {
         hardhat: {
             chainId: 31337,
+            allowUnlimitedContractSize: true,
         },
         goerli: {
             chainId: 5,
@@ -23,6 +24,7 @@ module.exports = {
             url: GOERLI_RPC_URL,
             accounts: [process.env.PRIVATE_KEY],
             saveDeployments: true,
+            allowUnlimitedContractSize: true,
         },
     },
     gasReport: {
