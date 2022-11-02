@@ -115,18 +115,24 @@ contract PredictionGame is AutomationCompatibleInterface, ChainlinkClient, Confi
                 address voter = currentDownVoters[i];
                 pendingReturns[voter] += (currentBids[voter]/ _currentDownPotSize) * _currentPotSize;
                 currentBids[voter] = 0;
+                currentVoters[voter] = 0;
             }
             for (uint i = 0; i < currentUpVotersLength; i++) {
-                currentBids[currentUpVoters[i]] = 0;
+                address voter = currentUpVoters[i];
+                currentBids[voter] = 0;
+                currentVoters[voter] = 0;
             }
         } else {
             for (uint i = 0; i < currentUpVotersLength; i++) {
                 address voter = currentUpVoters[i];
                 pendingReturns[voter] += (currentBids[voter]/ _currentUpPotSize) * _currentPotSize;
                 currentBids[voter] = 0;
+                currentVoters[voter] = 0;
             }
             for (uint i = 0; i < currentDownVotersLength; i++) {
-                currentBids[currentDownVoters[i]] = 0;
+                address voter = currentDownVoters[i];
+                currentBids[voter] = 0;
+                currentVoters[voter] = 0;
             }
         }
 
