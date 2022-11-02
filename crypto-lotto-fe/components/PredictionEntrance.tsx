@@ -15,13 +15,18 @@ import Button from "./Button"
 import { Simulate } from "react-dom/test-utils"
 import dynamic from "next/dynamic"
 import Web3 from "web3"
+<<<<<<< HEAD
 import { current } from "tailwindcss/colors"
+=======
+import { AbiItem } from 'web3-utils'
+import { IntrinsicAttributes } from "react-tradingview-widget"
+>>>>>>> a11307899ddf707727e38fc253924dfe8b4a1352
 
 const DynamicTradingView = dynamic(() => import("react-tradingview-widget"), { ssr: false })
 const web3 = new Web3("wss://goerli.infura.io/ws/v3/4c1b5e9f813e49a2b999153e01991e7a")
 // TODO: Set this somewhere else
 const address = contractAddresses.PredictionGame[0]
-const myContract = new web3.eth.Contract(abi, address)
+const myContract = new web3.eth.Contract(abi as AbiItem[], address)
 
 let options = {
     filter: {
@@ -430,7 +435,7 @@ export default function PredictionGameEntrance() {
                             </>
                         )}
                     </div>
-                    <DynamicTradingView symbol="BINANCE:ETHUSDT" theme="dark" range="1d" />
+                    <DynamicTradingView {...({symbol:"BINANCE:ETHUSDT"} as any)} theme="dark" range="1d" />
                 </div>
             </div>
         )
