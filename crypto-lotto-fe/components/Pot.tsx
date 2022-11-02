@@ -3,8 +3,8 @@ import { BigNumber } from "ethers"
 
 export type PotProps = {
     label: string
-    currentPrice: string
     prizePool: BigNumber
+    currentBid: BigNumber
     bidState: string
 }
 
@@ -124,7 +124,7 @@ const potDown = (lightUp) => {
     )
 }
 
-export default function Pot(args: PotProps) {
+export default function Pot({ currentBid, label, bidState, prizePool }: PotProps) {
     return (
         <div
             style={{
@@ -132,7 +132,7 @@ export default function Pot(args: PotProps) {
                 borderColor: "red",
             }}
         >
-            <p className="text-center">{args.label}</p>
+            <p className="text-center">{label}</p>
             {potUp(true)}
             <div
                 style={{
@@ -142,17 +142,17 @@ export default function Pot(args: PotProps) {
                 }}
             >
                 <h2 className="text-2xl mb-1">
-                    {args.label == "Next Pot" ? "Next Pool" : "Current Pool"}
+                    {label === "Next Pot" ? "Next Pool" : "Current Pool"}
                 </h2>
                 <div className="border border-blue-700 p-4 rounded-lg">
-                    <p className="text-0.1xs font-light font-mono">{`${args.currentPrice} ETH`}</p>
+                    <p className="text-0.1xs font-light font-mono">{`${formatEther(
+                        prizePool
+                    )} ETH`}</p>
                 </div>
-                {args.currentPrice != "" && (
-                    <>
-                        <p>
-                            Bid: {args.currentPrice}ETH {args.bidState}
-                        </p>
-                    </>
+                {!currentBid.isZero() && (
+                    <p>
+                        Bid: {formatEther(currentBid)} ETH {bidState}
+                    </p>
                 )}
             </div>
             {potDown(true)}
