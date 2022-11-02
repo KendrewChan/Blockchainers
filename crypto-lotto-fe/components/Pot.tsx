@@ -1,10 +1,11 @@
-import {formatEther} from "ethers/lib/utils";
-import {BigNumber} from "ethers";
+import { formatEther } from "ethers/lib/utils"
+import { BigNumber } from "ethers"
 
 export type PotProps = {
-    label: string,
-    currentPrice: string,
+    label: string
+    currentPrice: string
     prizePool: BigNumber
+    bidState: string
 }
 
 const potUp = (lightUp) => {
@@ -125,34 +126,36 @@ const potDown = (lightUp) => {
 
 export default function Pot(args: PotProps) {
     return (
-        <div style={{
-            "borderRadius": "5px",
-            "borderColor": "red",
-        }}>
-            <p
-                className="text-center"
-            >
-                {args.label}
-            </p>
-            {potUp(true )}
+        <div
+            style={{
+                borderRadius: "5px",
+                borderColor: "red",
+            }}
+        >
+            <p className="text-center">{args.label}</p>
+            {potUp(true)}
             <div
                 style={{
-                    "borderColor": "grey",
-                    "borderRadius": "2px",
-                    "textAlign": "center"
+                    borderColor: "grey",
+                    borderRadius: "2px",
+                    textAlign: "center",
                 }}
             >
-                <h2 className="text-2xl mb-1">{args.label == "Next Pot" ? "Next Pool" : "Current Pool"}</h2>
+                <h2 className="text-2xl mb-1">
+                    {args.label == "Next Pot" ? "Next Pool" : "Current Pool"}
+                </h2>
                 <div className="border border-blue-700 p-4 rounded-lg">
                     <p className="text-0.1xs font-light font-mono">{`${args.currentPrice} ETH`}</p>
                 </div>
-                {args.currentPrice != "" && <>
-                    <p>
-                        Round Price {args.currentPrice}
-                    </p>
-                </>}
+                {args.currentPrice != "" && (
+                    <>
+                        <p>
+                            Bid: {args.currentPrice}ETH {args.bidState}
+                        </p>
+                    </>
+                )}
             </div>
-            {potDown(true )}
+            {potDown(true)}
         </div>
-    );
+    )
 }

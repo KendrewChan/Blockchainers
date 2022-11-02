@@ -15,6 +15,7 @@ import Button from "./Button"
 import { Simulate } from "react-dom/test-utils"
 import dynamic from "next/dynamic"
 import Web3 from "web3"
+import { current } from "tailwindcss/colors"
 
 const DynamicTradingView = dynamic(() => import("react-tradingview-widget"), { ssr: false })
 const web3 = new Web3("wss://goerli.infura.io/ws/v3/4c1b5e9f813e49a2b999153e01991e7a")
@@ -42,6 +43,7 @@ export default function PredictionGameEntrance() {
     // Interaction with the smart contract
     const [nextEndTime, setNextEndTime] = useState<number>(0)
     const [nextDuration, setNextDuration] = useState<number>(0)
+    const [roundStart, setRoundStart] = useState<number>(0)
 
     const [ticketBid, setTicketBid] = useState<BigNumber>(BigNumber.from(0))
     const [lastPrice, setLastPrice] = useState<BigNumber>(BigNumber.from(0))
@@ -49,11 +51,12 @@ export default function PredictionGameEntrance() {
     const [direction, setDirection] = useState<boolean>(false)
 
     // 0 -> no bid, 1 -> bid up, 2 -> bid down
-    const [bidState, setBidState] = useState<number>(0)
+    const [currentBidState, setCurrentBidState] = useState<number>(0)
+    const [nextBidState, setNextBidState] = useState<number>(0)
 
     const [pricePool, setPricePool] = useState<BigNumber>(BigNumber.from(0))
     const [minBid, setMinBid] = useState<BigNumber>(BigNumber.from(0))
-    const [roundDuration, setRoundDuration] = useState<BigNumber>(BigNumber.from(0))
+    const [roundDuration, setRoundDuration] = useState<number>(0)
     const [currentPotsize, setCurrentPotsize] = useState<BigNumber>(BigNumber.from(0))
     const [currentUpPotsize, setCurrentUpPotsize] = useState<BigNumber>(BigNumber.from(0))
     const [currentDownPotsize, setCurrentDownPotsize] = useState<BigNumber>(BigNumber.from(0))
@@ -69,8 +72,8 @@ export default function PredictionGameEntrance() {
     // ------------------------ ROUND END BOOKKEEPING ------------------------ //
 
     const roundEnd = () => {
-        setBidState(0)
-        console.log("BID STATE:" + bidState)
+        updateUI()
+        console.log("BID STATE:" + nextBidState)
     }
 
     useEffect(() => {
@@ -139,10 +142,17 @@ export default function PredictionGameEntrance() {
         params: {},
     })
 
-    const { runContractFunction: getDirection } = useWeb3Contract({
+    const { runContractFunction: getNextBidState } = useWeb3Contract({
         abi: abi,
         contractAddress: address,
         functionName: "nextVoters",
+        params: { "": account },
+    })
+
+    const { runContractFunction: getCurrentBidState } = useWeb3Contract({
+        abi: abi,
+        contractAddress: address,
+        functionName: "currentVoters",
         params: { "": account },
     })
 
@@ -150,6 +160,13 @@ export default function PredictionGameEntrance() {
         abi: abi,
         contractAddress: address,
         functionName: "currentBids",
+        params: { "": account },
+    })
+
+    const { runContractFunction: getNextBid } = useWeb3Contract({
+        abi: abi,
+        contractAddress: address,
+        functionName: "nextBids",
         params: { "": account },
     })
 
@@ -212,11 +229,22 @@ export default function PredictionGameEntrance() {
         // Update when someone else bets on the pot or pot ends
         const newEndRoundTime = (await getRoundEndTime()) as number
         setNextEndTime(newEndRoundTime)
-        const duration = (await getRoundDuration()) as number
-        setNextDuration(duration)
+        const roundDuration = (await getRoundDuration()) as number
+        setRoundDuration(roundDuration)
 
-        const newbidState = (await getDirection()) as number
-        setBidState(newbidState)
+        const roundStart = newEndRoundTime as number
+        setRoundStart(roundStart)
+
+        const currentBidState = (await getCurrentBidState()) as number
+        console.log("CURRENT BID STATE: " + currentBidState)
+        setCurrentBidState(currentBidState)
+
+        const nextBidState = (await getNextBidState()) as number
+        console.log("NEXT BID STATE:" + nextBidState)
+        setNextBidState(nextBidState)
+
+        const nextBid = (await getNextBid()) as BigNumber
+        console.log("NEXT BID: " + nextBid)
 
         setLastPrice(currentPrice)
         const newCurrentPrice = (await getCurrentPrice()) as BigNumber
@@ -264,9 +292,10 @@ export default function PredictionGameEntrance() {
     const showCurrentPot = () => {
         return (
             <Pot
-                label={"Previous Pot"}
+                label={"Current Pot"}
                 currentPrice={formatEther(truncate(currentPotsize)).toString()}
                 prizePool={BigNumber.from(1000)}
+                bidState={currentBidState == 2 ? "DOWN" : currentBidState == 1 ? "UP" : ""}
             ></Pot>
         )
     }
@@ -277,6 +306,7 @@ export default function PredictionGameEntrance() {
                 label={"Next Pot"}
                 currentPrice={formatEther(truncate(nextPotsize)).toString()}
                 prizePool={BigNumber.from(1000)}
+                bidState={nextBidState == 2 ? "DOWN" : nextBidState == 1 ? "UP" : ""}
             ></Pot>
         )
     }
@@ -304,7 +334,7 @@ export default function PredictionGameEntrance() {
     }
 
     const showUserInterface = () => {
-        const secondsLeft = +nextEndTime + +nextDuration - Math.floor(Date.now() / 1000)
+        var countdown = +roundStart + +roundDuration - Math.floor(Date.now() / 1000) // DOES NOT UPDATE AFTER 18 TIMES
         return (
             <div className="w-full flex justify-center">
                 <div className="flex flex-col items-center gap-4">
@@ -317,12 +347,9 @@ export default function PredictionGameEntrance() {
                         >
                             <h1 className="text-4xl">Prediction Game</h1>
                             <p className="font-semibold text-ellipsis overflow-hidden">
-                                {secondsLeft < 0
-                                    ? "Round has ended"
-                                    : "Round ends in " + secondsLeft + "seconds."}
-                            </p>
-                            <p className="font-semibold text-ellipsis overflow-hidden">
-                                Current Pot Size: {currentPotsize.toString()}
+                                {countdown < 0
+                                    ? "Round has ended. Calculating results and starting next round..."
+                                    : "Round ends in " + countdown + "seconds."}
                             </p>
                             <div
                                 className={"container"}
@@ -334,7 +361,7 @@ export default function PredictionGameEntrance() {
                                 {showNextPot()}
                             </div>
                         </div>
-                        {bidState > 0 && (
+                        {nextBidState == 0 && countdown > 0 && (
                             <>
                                 <p>Your bid for the next round</p>
                                 <form
@@ -410,5 +437,6 @@ export default function PredictionGameEntrance() {
     }
 
     if (!address) return <div>No Raffle Address detected</div>
+    console.log("here")
     return showUserInterface()
 }
