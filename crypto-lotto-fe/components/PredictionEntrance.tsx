@@ -37,6 +37,7 @@ export default function PredictionGameEntrance() {
     const { account, chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const dispatch = useNotification()
 
+
     // TODO: Need to display error messages in a good way
 
     // Interaction with the smart contract

@@ -40,7 +40,10 @@ export default function LotteryEntrance() {
         },
     })
 
-    const toBuyCount = watch("ticketCount")
+    let toBuyCount = watch("ticketCount")
+    if (isNaN(toBuyCount)) {
+        toBuyCount = 0;
+    }
 
     useEffect(() => {
         if (isWeb3Enabled) updateUI()
@@ -242,8 +245,15 @@ export default function LotteryEntrance() {
                                 type="number"
                                 placeholder="Number of tickets to buy"
                                 min={1}
-                                required={true}
-                                {...register("ticketCount", { required: true })}
+                                required={false}
+                                {...register("ticketCount", {
+                                    required: false,
+                                    valueAsNumber: true,
+                                    min: 1,
+                                    validate: (value) => {
+                                        return 1 <= value;
+                                    }
+                                })}
                             />
                             <button
                                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
