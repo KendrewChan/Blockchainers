@@ -1,7 +1,6 @@
 import { useWeb3Contract, useMoralis } from "react-moralis"
 import { useEffect, useState } from "react"
 import { useNotification } from "web3uikit"
-import PrizePool from "./PrizePool"
 import ErrorBanner from "./ErrorBanner"
 
 import { BigNumber } from "ethers"
@@ -52,7 +51,6 @@ export default function LotteryEntrance() {
         if (isWeb3Enabled) updateUI()
     }, [isWeb3Enabled])
 
-    // TODO: Make user be able to input the number of tickets he want to buy
     const {
         runContractFunction: buyTickets,
         data: enterTxResponse,
@@ -200,12 +198,36 @@ export default function LotteryEntrance() {
         })
     }
 
+    const calculateTimeLeft = () => {
+        const today = new Date();
+        const time = {
+            hrs: 23 - today.getHours(),
+            min: 59 - today.getMinutes(),
+            sec: 59 - today.getSeconds()
+        }
+        return `${time.hrs}:${time.min}:${time.sec}`
+    }
+
+    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft())
+
+    useEffect(() => {
+        setTimeout(() => {
+          setTimeLeft(calculateTimeLeft());
+        }, 1000);
+    });
+
     const showUserInterface = () => {
         const prizePool = totalTicketCount.mul(ticketCost)
         return (
             <div className="flex justify-center w-full">
                 <div className="flex flex-1 flex-col justify-center max-w-xl m-4 space-y-4">
                     <h1 className="text-4xl">Lottery</h1>
+                    <div className="border border-blue-700 p-4 rounded-lg">
+                        <p className="text-4xl font-light font-mono">{timeLeft}</p>
+                        <p className="text-xl">
+                            to next winner
+                            </p>
+                    </div>
                     <p className="font-semibold text-ellipsis overflow-hidden">
                         Recent Winner: <p>{recentWinner}</p>
                     </p>
@@ -339,7 +361,9 @@ export default function LotteryEntrance() {
         )
     }
 
-    if (!raffleAddress) return <div>No Raffle Address detected</div>
+    if (!raffleAddress) return <div className="flex justify-center w-full"><p className="font-semibold text-ellipsis overflow-hidden">
+    Address not connected to Goerli Network
+</p></div>
     if (isAdminPage) return showAdminInterface()
     return showUserInterface()
 }
