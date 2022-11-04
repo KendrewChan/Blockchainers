@@ -19,7 +19,7 @@ export type BuyTicketFormData = {
 export default function LotteryEntrance() {
     // TODO: Check if other networks are being used, and reject/show diff page
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
-    const chainId = parseInt(chainIdHex)
+    const chainId = parseInt(chainIdHex as string)
     const raffleAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
 
     const dispatch = useNotification()
