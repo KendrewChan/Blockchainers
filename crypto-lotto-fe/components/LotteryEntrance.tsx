@@ -44,6 +44,9 @@ export default function LotteryEntrance() {
     if (isNaN(toBuyCount)) {
         toBuyCount = 0;
     }
+    if (toBuyCount % 1 !== 0) {
+        toBuyCount = Math.trunc(toBuyCount)
+    }
 
     useEffect(() => {
         if (isWeb3Enabled) updateUI()
@@ -250,8 +253,8 @@ export default function LotteryEntrance() {
                                     required: false,
                                     valueAsNumber: true,
                                     min: 1,
-                                    validate: (value) => {
-                                        return 1 <= value;
+                                    validate: v => {
+                                       return 1 <= v && v % 1 === 0;
                                     }
                                 })}
                             />
