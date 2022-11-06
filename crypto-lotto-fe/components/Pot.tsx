@@ -6,6 +6,7 @@ export type PotProps = {
     prizePool: BigNumber
     currentBid: BigNumber
     bidState: string
+    result?: "Up" | "Down"
 }
 
 const potUp = (lightUp) => {
@@ -124,7 +125,7 @@ const potDown = (lightUp) => {
     )
 }
 
-export default function Pot({ currentBid, label, bidState, prizePool }: PotProps) {
+export default function Pot({ currentBid, label, bidState, prizePool, result }: PotProps) {
     return (
         <div
             style={{
@@ -133,7 +134,7 @@ export default function Pot({ currentBid, label, bidState, prizePool }: PotProps
             }}
         >
             <p className="text-center">{label}</p>
-            {potUp(true)}
+            {potUp(result === undefined || result === "Up")}
             <div
                 style={{
                     borderColor: "grey",
@@ -155,7 +156,7 @@ export default function Pot({ currentBid, label, bidState, prizePool }: PotProps
                     </p>
                 )}
             </div>
-            {potDown(true)}
+            {potDown(result === undefined || result === "Down")}
         </div>
     )
 }

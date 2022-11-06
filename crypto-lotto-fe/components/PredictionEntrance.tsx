@@ -100,6 +100,24 @@ export default function PredictionGameEntrance() {
         params: { isVoteUp: direction },
     })
 
+    const { runContractFunction: getCurrentRoundPrice, data: currentRoundPrice } =
+        useContract<BigNumber>({
+            abi: abi,
+            contractAddress: address,
+            functionName: "currentRoundPrice",
+            params: {},
+            defaultValue: BigNumber.from(0),
+        })
+
+    const { runContractFunction: getLastRoundPrice, data: lastRoundPrice } =
+        useContract<BigNumber>({
+            abi: abi,
+            contractAddress: address,
+            functionName: "lastRoundPrice",
+            params: {},
+            defaultValue: BigNumber.from(0),
+        })
+
     const { runContractFunction: getRoundEndTime, data: roundStart } = useContract<BigNumber>({
         abi: abi,
         contractAddress: address,
@@ -234,6 +252,8 @@ export default function PredictionGameEntrance() {
                 getMinBid,
                 getRoundEndTime,
                 getRoundDuration,
+                getCurrentRoundPrice,
+                getLastRoundPrice,
             ].map((fn) => fn())
         )
     }
@@ -295,6 +315,8 @@ export default function PredictionGameEntrance() {
 
     if (!address) return <div>No Raffle Address detected</div>
 
+    const priceDiff = currentRoundPrice?.sub(lastRoundPrice ?? 0)
+
     return (
         <div className="w-full flex justify-center">
             <div className="flex flex-col items-center gap-4">
@@ -308,6 +330,9 @@ export default function PredictionGameEntrance() {
                         </p>
                         <div className="flex gap-4">
                             <Pot
+                                result={
+                                    priceDiff?.gt(0) ? "Up" : priceDiff?.lt(0) ? "Down" : undefined
+                                }
                                 label={"Current Pot"}
                                 currentBid={currentBid ?? BigNumber.from(0)}
                                 prizePool={currentPotSize ?? BigNumber.from(0)}
