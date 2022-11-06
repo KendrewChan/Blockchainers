@@ -37,7 +37,6 @@ export default function PredictionGameEntrance() {
     const { account, chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const dispatch = useNotification()
 
-
     // TODO: Need to display error messages in a good way
 
     // Interaction with the smart contract
@@ -301,11 +300,11 @@ export default function PredictionGameEntrance() {
             <div className="flex flex-col items-center gap-4">
                 <div className="flex flex-col max-w-xl">
                     <div className="flex flex-1 flex-col justify-center max-w-xl m-4 space-y-4">
-                        <h1 className="text-4xl">Prediction Game {countdown}</h1>
+                        <h1 className="text-4xl">Prediction Game</h1>
                         <p className="font-semibold text-ellipsis overflow-hidden">
                             {countdown < 0
                                 ? "Round has ended. Calculating results and starting next round..."
-                                : "Round ends in " + countdown + "seconds."}
+                                : "Round ends in " + countdown + " seconds."}
                         </p>
                         <div className="flex gap-4">
                             <Pot
