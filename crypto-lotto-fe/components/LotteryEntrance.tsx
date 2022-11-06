@@ -10,7 +10,6 @@ import contractAddresses from "../constants/contractAddresses.json"
 import abi from "../constants/abi.json"
 import { useForm } from "react-hook-form"
 
-
 export type BuyTicketFormData = {
     ticketCount: number
 }
@@ -30,8 +29,8 @@ export default function LotteryEntrance() {
     const [isAdmin, setIsAdmin] = useState(false)
     const [isAdminPage, setIsAdminPage] = useState(false)
     const [newAdminAddr, setNewAdminAddr] = useState("")
-    const [buyError, setBuyError] = useState(false);
-    const [buyErrorMessage, setBuyErrorMessage] = useState("");
+    const [buyError, setBuyError] = useState(false)
+    const [buyErrorMessage, setBuyErrorMessage] = useState("")
 
     const { register, watch, handleSubmit } = useForm<BuyTicketFormData>({
         defaultValues: {
@@ -41,7 +40,7 @@ export default function LotteryEntrance() {
 
     let toBuyCount = watch("ticketCount")
     if (isNaN(toBuyCount)) {
-        toBuyCount = 0;
+        toBuyCount = 0
     }
     if (toBuyCount % 1 !== 0) {
         toBuyCount = Math.trunc(toBuyCount)
@@ -199,11 +198,11 @@ export default function LotteryEntrance() {
     }
 
     const calculateTimeLeft = () => {
-        const today = new Date();
+        const today = new Date()
         const time = {
             hrs: 23 - today.getHours(),
             min: 59 - today.getMinutes(),
-            sec: 59 - today.getSeconds()
+            sec: 59 - today.getSeconds(),
         }
         return `${time.hrs}:${time.min}:${time.sec}`
     }
@@ -212,9 +211,9 @@ export default function LotteryEntrance() {
 
     useEffect(() => {
         setTimeout(() => {
-          setTimeLeft(calculateTimeLeft());
-        }, 1000);
-    });
+            setTimeLeft(calculateTimeLeft())
+        }, 1000)
+    })
 
     const showUserInterface = () => {
         const prizePool = totalTicketCount.mul(ticketCost)
@@ -224,9 +223,7 @@ export default function LotteryEntrance() {
                     <h1 className="text-4xl">Lottery</h1>
                     <div className="border border-blue-700 p-4 rounded-lg">
                         <p className="text-4xl font-light font-mono">{timeLeft}</p>
-                        <p className="text-xl">
-                            to next winner
-                            </p>
+                        <p className="text-xl">to next winner</p>
                     </div>
                     <p className="font-semibold text-ellipsis overflow-hidden">
                         Recent Winner: <p>{recentWinner}</p>
@@ -256,44 +253,48 @@ export default function LotteryEntrance() {
                             })}
                             className="flex flex-col gap-2 flex-wrap item-center"
                         >
-                            <div className="flex item-center" >
-
-                            {buyError ?
-                                (<ErrorBanner error={buyErrorMessage} closeCB={() => {setBuyError(false)}}></ErrorBanner>)
-                                :  (<div></div>)
-                            }
-                            </div>
-                            <div className="flex gap-2 flex-wrap">
-
-                            <input
-                                className="border-2 flex-1 border-gray-300 bg-white p-2 rounded text-sm focus:outline-none"
-                                type="number"
-                                placeholder="Number of tickets to buy"
-                                min={1}
-                                required={false}
-                                {...register("ticketCount", {
-                                    required: false,
-                                    valueAsNumber: true,
-                                    min: 1,
-                                    validate: v => {
-                                       return 1 <= v && v % 1 === 0;
-                                    }
-                                })}
-                            />
-                            <button
-                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-                                onClick={handleBuyTicket}
-                                disabled={isLoading || isFetching || toBuyCount <= 0}
-                                type="submit"
-                            >
-                                {isLoading || isFetching ? (
-                                    <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+                            <div className="flex item-center">
+                                {buyError ? (
+                                    <ErrorBanner
+                                        error={buyErrorMessage}
+                                        closeCB={() => {
+                                            setBuyError(false)
+                                        }}
+                                    ></ErrorBanner>
                                 ) : (
-                                    `Buy ${toBuyCount} tickets for ${formatEther(
-                                        ticketCost.mul(toBuyCount)
-                                    )} ETH`
+                                    <div></div>
                                 )}
-                            </button>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <input
+                                    className="border-2 flex-1 border-gray-300 bg-white p-2 rounded text-sm focus:outline-none"
+                                    type="number"
+                                    placeholder="Number of tickets to buy"
+                                    min={1}
+                                    required={false}
+                                    {...register("ticketCount", {
+                                        required: false,
+                                        valueAsNumber: true,
+                                        min: 1,
+                                        validate: (v) => {
+                                            return 1 <= v && v % 1 === 0
+                                        },
+                                    })}
+                                />
+                                <button
+                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+                                    onClick={handleBuyTicket}
+                                    disabled={isLoading || isFetching || toBuyCount <= 0}
+                                    type="submit"
+                                >
+                                    {isLoading || isFetching ? (
+                                        <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+                                    ) : (
+                                        `Buy ${toBuyCount} tickets for ${formatEther(
+                                            ticketCost.mul(toBuyCount)
+                                        )} ETH`
+                                    )}
+                                </button>
                             </div>
                         </form>
                     </section>
@@ -316,54 +317,57 @@ export default function LotteryEntrance() {
 
     const showAdminInterface = () => {
         return (
-            <div className="flex justify-center min-w-50" >
-            <div className="flex flex-col justify-center">
-                <br />
-                <b>Add New Admin: </b>
-                <div className="flex ">
-                    <input
-
-                        className="border-2 flex-1 border-gray-300 bg-white p-2 rounded text-sm focus:outline-none"
-                        type="text"
-                        placeholder="0x00000000..."
-                        onChange={(e) => setNewAdminAddr(e.target.value)}
-                        required
-                    />
-                    <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
-                        onClick={addNewAdmin}
-                    >
-                        Submit
-                    </button>
+            <div className="flex justify-center min-w-50">
+                <div className="flex flex-col justify-center">
+                    <br />
+                    <b>Add New Admin: </b>
+                    <div className="flex ">
+                        <input
+                            className="border-2 flex-1 border-gray-300 bg-white p-2 rounded text-sm focus:outline-none"
+                            type="text"
+                            placeholder="0x00000000..."
+                            onChange={(e) => setNewAdminAddr(e.target.value)}
+                            required
+                        />
+                        <button
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
+                            onClick={addNewAdmin}
+                        >
+                            Submit
+                        </button>
+                    </div>
+                    <br />
+                    <div className="flex justify-between">
+                        <div>
+                            <button
+                                className="bg-slate-400 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded ml-auto"
+                                onClick={changeAdminPage}
+                            >
+                                Back to lottery page
+                            </button>
+                        </div>
+                        <p>
+                            <button
+                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
+                                onClick={selectWinnerBtn}
+                            >
+                                Select Winner
+                            </button>
+                        </p>
+                    </div>
                 </div>
-                <br />
-                <div className="flex justify-between">
-                <div>
-                    <button
-                        className="bg-slate-400 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded ml-auto"
-                        onClick={changeAdminPage}
-                    >
-                        Back to lottery page
-                    </button>
-                </div>
-                <p>
-                    <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
-                        onClick={selectWinnerBtn}
-                    >
-                        Select Winner
-                    </button>
-                </p>
-                </div>
-            </div>
-
             </div>
         )
     }
 
-    if (!raffleAddress) return <div className="flex justify-center w-full"><p className="font-semibold text-ellipsis overflow-hidden">
-    Address not connected to Goerli Network
-</p></div>
+    if (!raffleAddress)
+        return (
+            <div className="flex justify-center w-full">
+                <p className="font-semibold text-ellipsis overflow-hidden">
+                    Address not connected to Goerli Network
+                </p>
+            </div>
+        )
     if (isAdminPage) return showAdminInterface()
     return showUserInterface()
 }
